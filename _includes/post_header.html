@@ -1,0 +1,16 @@
+<header id="post-header">
+        {%- assign url = page.url | remove_first: "/" | split: "/" -%}
+    <span id="post-header-url">
+        <a href="/">..</a>/
+        {%- for url_component in url -%}
+            {%- assign href = href | append: "/" | append: url_component -%}
+            {%- unless forloop.last -%}
+        <a href="{{ href }}">{{ url_component }}</a>/
+            {%- endunless -%}
+        {%- endfor -%}
+        {{ url.last}}
+    </span>
+    <span id="post-header-date">
+        <time datetime="{{ page.date | date_to_xmlschema }}">{{ page.date | date: "%Y-%m-%d" }}</time>
+    </span>
+</header>

@@ -1,0 +1,19 @@
+---
+---
+
+{%- assign date = 'now' | date: '%m-%d' -%}
+{%- if date < '03-20' -%}
+@import "winter";
+{%- elsif date < '06-21' -%}
+@import "spring";
+{%- elsif date < '09-23' -%}
+@import "summer";
+{%- elsif date < '12-22' -%}
+@import "autumn";
+{%- else -%}
+@import "winter";
+{%- endif -%}
+
+@import "colors";
+@import "general";
+@import "post";

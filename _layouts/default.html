@@ -1,0 +1,19 @@
+<html>
+    <head>
+        <title>
+            {%- if page.title -%}
+              {{ page.title }}
+            {%- else -%}
+              {{ site.title }}
+            {%- endif -%}
+        </title>
+        <link rel="icon" href="/assets/images/favicon.ico"/>
+        <link rel="stylesheet" href="/assets/css/main.css"/>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/normalize.css@8.0.1/normalize.css"/>
+    </head>
+    <body>
+        <main>
+            {{ content }}
+        </main>
+    </body>
+</html>

@@ -1,0 +1,9 @@
+title: Et facta est lux
+author: UserNombre
+
+url: "https://usernombre.github.io"
+baseurl: ""
+
+markdown: kramdown
+plugins:
+  - jekyll-feed

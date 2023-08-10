@@ -1,0 +1,19 @@
+#post-header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    background: $color-secondary-dark;
+}
+
+#post-header-url {
+    margin: 2px;
+    text-align: left;
+}
+
+#post-header-date {
+    margin: 2px;
+    text-align: right;
+}

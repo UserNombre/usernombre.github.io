@@ -1,0 +1,43 @@
+body {
+    color: $color-foreground;
+    background: $color-background;
+    font-family: monospace;
+    font-size: 16px;
+}
+
+main {
+    margin: 4em auto;
+    max-width: 70%;
+}
+
+article {
+    overflow-wrap: break-word;
+}
+
+h1 {
+    &:before { content: "> " }
+}
+
+a {
+    color: $color-primary-light;
+}
+
+a:hover {
+    color: $color-background;
+    background: $color-primary;
+}
+
+a:active {
+    color: $color-foreground;
+    background: $color-primary;
+}
+
+*:target {
+    color: $color-background;
+    background: $color-primary-dark;
+}
+
+
+*::selection {
+    background: $color-secondary;
+}
