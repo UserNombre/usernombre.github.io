@@ -1,7 +1,7 @@
 body {
     color: $color-foreground;
     background: $color-background;
-    font-family: monospace;
+    font-family: Verdana, sans-serif;
     font-size: 16px;
 }
 
@@ -14,8 +14,8 @@ article {
     overflow-wrap: break-word;
 }
 
-h1 {
-    &:before { content: "> " }
+code {
+    font-family: Consolas, monospace;
 }
 
 a {
@@ -37,7 +37,26 @@ a:active {
     background: $color-primary-dark;
 }
 
-
 *::selection {
     background: $color-secondary;
+}
+
+// The 'background' does not apply to '::marker' https://drafts.csswg.org/css-lists-3/#marker-properties
+// Force its color to foreground so it's still readable when affected by '*:target'
+::marker {
+    color: $color-foreground;
+}
+
+#title {
+    &:before {
+        content: "> ";
+        animation: blink 1s step-start 0s infinite;
+        font-family: Consolas, monospace;
+    }
+}
+
+@keyframes blink {
+    50% {
+        opacity: 0.0;
+    }
 }

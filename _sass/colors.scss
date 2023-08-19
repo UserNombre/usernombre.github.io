@@ -1,8 +1,12 @@
 $color-white: #fff;
 $color-black: #000;
+$color-gray-darkest: lighten($color-black, 5%);
+$color-gray-dark: lighten($color-black, 15%);
+$color-gray-light: lighten($color-black, 25%);
+$color-gray-lightest: lighten($color-black, 40%);
 
 $color-foreground: $color-white;
-$color-background: $color-black;
+$color-background: $color-gray-darkest;
 
 $color-primary: map-get($theme-colors, "color-primary-0");
 $color-primary-lightest: map-get($theme-colors, "color-primary-1");

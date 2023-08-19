@@ -2,10 +2,12 @@
     position: fixed;
     top: 0;
     left: 0;
+    z-index: 100;
     display: flex;
     justify-content: space-between;
     width: 100%;
     background: $color-secondary-dark;
+    font-family: Consolas, monospace;
 }
 
 #post-header-url {
