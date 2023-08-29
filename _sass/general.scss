@@ -1,3 +1,9 @@
+//// CSS elements
+
+html {
+    scroll-behavior: smooth;
+}
+
 body {
     color: $color-foreground;
     background: $color-background;
@@ -14,42 +20,28 @@ article {
     overflow-wrap: break-word;
 }
 
+p {
+    line-height: 1.35em;
+}
+
+table, th, td {
+    padding: 16px;
+    border: thin solid $color-gray-lightest;
+    border-collapse: collapse;
+}
+
 code {
     font-family: Consolas, monospace;
 }
 
-// https://github.com/rouge-ruby/rouge/blob/master/lib/rouge/token.rb
-.highlight {
-    // :Name
-    .n, .na, .nb, .bp, .nc, .no, .nd, .ni, .ne, .nf, .fm, .py, .nl, .nn, .nx, .nt, .nv, .vc, .vg, .vi, .vm {
-        color: $color-secondary-dark;
-    }
-    // :Literal
-    .l, .ld, .s, .sa, .sb, .sc, .dl, .sd, .s2, .se, .sh, .si, .sx, .sr, .s1, .ss, .m, .mb, .mf, .mh, .mi, .il, .mo, .mx {
-        color: $color-primary;
-    }
-}
-
-// Prevent default margin from interefering with padding
-pre {
-    margin: 0;
-}
-
-code.highlighter-rouge {
-    padding: 2px;
-    border-radius: 6px;
-    background-color: $color-gray-light;
-}
-
-div.highlighter-rouge {
-    padding: 8px;
-    border-radius: 6px;
-    background-color: $color-gray-dark;
-}
-
 a {
+    padding: 1px;
+    border-radius: 2px;
     color: $color-primary-light;
+    text-decoration: none;
 }
+
+//// CSS pseudo-classes
 
 a:hover {
     color: $color-background;
@@ -61,26 +53,44 @@ a:active {
     background: $color-primary;
 }
 
-*:target {
+// Highlight headers
+h1:target, h2:target {
     color: $color-background;
-    background: $color-primary-dark;
+    background: $color-secondary-darkest;
 }
 
-*::selection {
-    background: $color-secondary;
+// Highlight footnotes
+*[role=doc-endnote]:target {
+    outline: rgb(255, 178, 25) dashed 2px;
+    outline-offset: 2px;
+    transition: outline-color 1s;
 }
 
-// The 'background' does not apply to '::marker' https://drafts.csswg.org/css-lists-3/#marker-properties
-// Force its color to foreground so it's still readable when affected by '*:target'
-::marker {
-    color: $color-foreground;
+//// CSS pseudo-elements
+
+::selection {
+    background: $color-gray-lightest;
 }
+
+//// Custom classes
+
+.side-by-side {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.math {
+    font-family: Consolas, math;
+}
+
+//// Custom ids
 
 #title {
     &:before {
+        font-family: Consolas, monospace;
         content: "> ";
         animation: blink 1s step-start 0s infinite;
-        font-family: Consolas, monospace;
     }
 }
 
