@@ -1,17 +1,16 @@
 <html>
     <head>
         <title>
-            {%- if page.title -%}
-              {{ page.title }}
-            {%- else -%}
-              {{ site.title }}
-            {%- endif -%}
+            {{ page.title | default: site.title }}
         </title>
         <link rel="icon" href="/assets/images/favicon.ico"/>
-        <link rel="stylesheet" href="/assets/css/main.css"/>
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/normalize.css@8.0.1/normalize.css"/>
+        <link rel="stylesheet" href="/assets/css/main.css"/>
     </head>
     <body>
+        {%- if page.name != "index.html" -%}
+            {%- include header.html %}
+        {%- endif -%}
         <main>
             {{ content }}
         </main>

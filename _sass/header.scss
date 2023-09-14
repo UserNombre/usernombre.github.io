@@ -3,7 +3,7 @@ html {
     scroll-padding-top: 40px;
 }
 
-#post-header {
+#header {
     position: fixed;
     top: 0;
     left: 0;
@@ -15,12 +15,12 @@ html {
     font-family: Consolas, monospace;
 }
 
-#post-header-url {
+#header-left {
     margin: 2px;
     text-align: left;
 }
 
-#post-header-date {
+#header-right {
     margin: 2px;
     text-align: right;
 }
