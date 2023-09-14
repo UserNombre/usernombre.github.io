@@ -10,7 +10,13 @@
         {%- endfor -%}
         {{ url.last}}
     </span>
+    {%- if page.id -%}
     <span id="header-right">
+        {%- if page.last_modified -%}
+        [+]<time datetime="{{ page.last_modified | date_to_xmlschema }}">{{ page.last_modified | date: "%Y-%m-%d" }}</time>
+        {%- else -%}
         <time datetime="{{ page.date | date_to_xmlschema }}">{{ page.date | date: "%Y-%m-%d" }}</time>
+        {%- endif -%}
     </span>
+    {%- endif -%}
 </header>
