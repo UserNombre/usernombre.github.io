@@ -3,6 +3,6 @@ layout: default
 ---
 
 <header>
-    <h1>{{ page.title }}</h1>
+    <h1>{{ page.title | default: page.url }}</h1>
 </header>
 {%- include post_list.html posts=page.posts -%}

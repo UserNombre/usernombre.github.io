@@ -1,5 +1,7 @@
 ---
 layout: post
+category: articles
+tags: web
 ---
 
 This page aims to be a technical demo for the website as well as a means of documentation.

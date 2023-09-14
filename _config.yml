@@ -3,8 +3,16 @@ author: UserNombre
 
 url: "https://usernombre.github.io"
 baseurl: ""
+permalink: "/:year/:month/:day/:title:output_ext"
 
 markdown: kramdown
 highlighter: rouge
 plugins:
   - jekyll-feed
+  - jekyll-archives
+
+jekyll-archives:
+  enabled: all
+  permalinks:
+    tag: "/tags/:name/"
+    category: "/categories/:name/"

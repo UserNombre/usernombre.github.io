@@ -1,0 +1,15 @@
+---
+layout: default
+title: categories
+---
+
+<header>
+    <h1>categories</h1>
+</header>
+<ul>
+{%- for category in site.categories %}
+    <li>
+      <a href="{{ category[0] | prepend: "/categories/" | append: "/" }}">{{ category[0] }}</a>
+    </li>
+{%- endfor %}
+</ul>

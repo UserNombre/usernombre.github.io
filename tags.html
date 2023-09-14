@@ -1,0 +1,15 @@
+---
+layout: default
+title: tags
+---
+
+<header>
+    <h1>tags</h1>
+</header>
+<ul>
+{%- for tag in site.tags %}
+    <li>
+      <a href="{{ tag[0] | prepend: "/tags/" | append: "/" }}">{{ tag[0] }}</a>
+    </li>
+{%- endfor %}
+</ul>
