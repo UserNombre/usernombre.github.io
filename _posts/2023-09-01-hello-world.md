@@ -8,7 +8,7 @@ This page aims to be a technical demo for the website as well as a means of docu
 
 ## Framework
 
-The site is built with [Jekyll](https://jekyllrb.com/), a [static site generator](https://en.wikipedia.org/wiki/Static_site_generator) 
+The site is built with [Jekyll](https://jekyllrb.com/), a [static site generator](https://en.wikipedia.org/wiki/Static_site_generator)
 written in Ruby. Jekyll takes a [structured directory](https://jekyllrb.com/docs/structure/) as input,
 and, after processing, outputs a `_site` directory which can be served by most web servers or
 [hosting providers](https://jekyllrb.com/docs/deployment/third-party/).
@@ -26,7 +26,7 @@ both of which can be written either in HTML or Markdown. Markdown tends to be pr
 content such as posts, as it is more straightforward to write than HTML, even if less powerful.
 
 Markdown is processed by [Kramdown](https://kramdown.gettalong.org) using GitHub's [GFM](https://github.github.com/gfm/)
-as the default syntax[^jekyll-markdown]. When writing more complex content, such as math text 
+as the default syntax[^jekyll-markdown]. When writing more complex content, such as math text
 requiring special markup like subscripts, [inline HTML](https://kramdown.gettalong.org/syntax.html#html-spans)
 can be used for the task. Kramdown also provides other handy features such as [footnotes](https://kramdown.gettalong.org/syntax.html#footnotes)
 or [inline attribute lists](https://kramdown.gettalong.org/syntax.html#inline-attribute-lists),
@@ -35,7 +35,7 @@ which can set HTML attributes for the given block, for instance to style element
 <div markdown="1" class="side-by-side">
 
 ```md
-|                   | 0                                 | 1                 | 
+|                   | 0                                 | 1                 |
 |------------------:|:----------------------------------|:------------------|
 | → q<sub>0</sub>   | {q<sub>0</sub>, q<sub>1</sub>}    | {q<sub>0</sub>}   |
 |   q<sub>1</sub>   | &#8709;                           | {q<sub>1</sub>}   |
@@ -43,7 +43,7 @@ which can set HTML attributes for the given block, for instance to style element
 {: .math}
 ```
 
-|                   | 0                                 | 1                 | 
+|                   | 0                                 | 1                 |
 |------------------:|:----------------------------------|:------------------|
 | → q<sub>0</sub>   | {q<sub>0</sub>, q<sub>1</sub>}    | {q<sub>0</sub>}   |
 |   q<sub>1</sub>   | &#8709;                           | {q<sub>1</sub>}   |
@@ -52,7 +52,7 @@ which can set HTML attributes for the given block, for instance to style element
 
 </div>
 
-Some other constructs which are not possible using Markdown alone, such as the side-by-side 
+Some other constructs which are not possible using Markdown alone, such as the side-by-side
 code block and table, are possible thanks to [HTML blocks](https://kramdown.gettalong.org/syntax.html#html-blocks),
 which can contain further Markdown:
 
@@ -60,7 +60,7 @@ which can contain further Markdown:
 <div markdown="1" class="side-by-side">
 
 ```md
-|                   | 0                                 | 1                 | 
+|                   | 0                                 | 1                 |
 |------------------:|:----------------------------------|:------------------|
 | → q<sub>0</sub>   | {q<sub>0</sub>, q<sub>1</sub>}    | {q<sub>0</sub>}   |
 |   q<sub>1</sub>   | &#8709;                           | {q<sub>1</sub>}   |
@@ -68,7 +68,7 @@ which can contain further Markdown:
 {: .math}
 ```
 
-|                   | 0                                 | 1                 | 
+|                   | 0                                 | 1                 |
 |------------------:|:----------------------------------|:------------------|
 | → q<sub>0</sub>   | {q<sub>0</sub>, q<sub>1</sub>}    | {q<sub>0</sub>}   |
 |   q<sub>1</sub>   | &#8709;                           | {q<sub>1</sub>}   |
