@@ -3,9 +3,12 @@
         <title>
             {{ page.title | default: site.title }}
         </title>
-        <link rel="icon" href="/assets/images/favicon.ico"/>
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch&family=Inconsolata&display=swap">
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/normalize.css@8.0.1/normalize.css"/>
         <link rel="stylesheet" href="/assets/css/main.css"/>
+        <link rel="icon" href="/assets/images/favicon.ico"/>
     </head>
     <body>
         {%- if page.name != "index.html" -%}

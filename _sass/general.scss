@@ -7,7 +7,7 @@ html {
 body {
     color: $color-foreground;
     background: $color-background;
-    font-family: Verdana, sans-serif;
+    font-family: $font-sans-serif, sans-serif;
     font-size: 16px;
 }
 
@@ -31,7 +31,7 @@ table, th, td {
 }
 
 code {
-    font-family: Consolas, monospace;
+    font-family: $font-monospace, monospace;
 }
 
 // Hide the default marker
@@ -82,7 +82,7 @@ details h1::before {
     // Inline elements can't be transformed
     display: inline-block;
     margin-right: 16px;
-    font-family: Consolas, monospace;
+    font-family: $font-monospace, monospace;
     content: ">";
     transition: transform 0.1s;
     animation: blink 1s infinite;
@@ -96,7 +96,7 @@ details[open] h1::before {
 
 .item {
     padding: 4px;
-    border: thin solid white;
+    border: thin solid $color-gray-light;
     border-radius: 8px;
     background-color: $color-gray-dark;
 }
@@ -124,7 +124,7 @@ details[open] h1::before {
 }
 
 .math {
-    font-family: Consolas, math;
+    font-family: $font-monospace, math;
 }
 
 /// Animations

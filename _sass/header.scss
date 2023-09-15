@@ -12,7 +12,7 @@ html {
     justify-content: space-between;
     width: 100%;
     background: $color-secondary-dark;
-    font-family: Consolas, monospace;
+    font-family: $font-monospace, monospace;
 }
 
 #header-left {

@@ -20,3 +20,6 @@ $color-secondary-lightest: map-get($theme-colors, "color-secondary-#{$theme-seco
 $color-secondary-light: map-get($theme-colors, "color-secondary-#{$theme-secondary}-2");
 $color-secondary-darkest: map-get($theme-colors, "color-secondary-#{$theme-secondary}-3");
 $color-secondary-dark: map-get($theme-colors, "color-secondary-#{$theme-secondary}-4");
+
+$font-sans-serif: "Chakra Petch";
+$font-monospace: "Inconsolata";
