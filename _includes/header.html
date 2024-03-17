@@ -13,7 +13,8 @@
     {%- if page.id -%}
     <span id="header-right">
         {%- if page.last_modified -%}
-        [+]<time datetime="{{ page.last_modified | date_to_xmlschema }}">{{ page.last_modified | date: "%Y-%m-%d" }}</time>
+        [<a href="https://github.com/UserNombre/usernombre.github.io/commits/main/{{ page.path }}">+</a>]
+        <time datetime="{{ page.last_modified | date_to_xmlschema }}">{{ page.last_modified | date: "%Y-%m-%d" }}</time>
         {%- else -%}
         <time datetime="{{ page.date | date_to_xmlschema }}">{{ page.date | date: "%Y-%m-%d" }}</time>
         {%- endif -%}
