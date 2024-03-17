@@ -67,7 +67,7 @@ h1:target, h2:target {
 
 // Highlight footnotes
 *[role=doc-endnote]:target {
-    outline: rgb(255, 178, 25) dashed 2px;
+    outline: $color-secondary-light dashed 2px;
     outline-offset: 2px;
     transition: outline-color 1s;
 }
