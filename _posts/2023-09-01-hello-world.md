@@ -11,13 +11,11 @@ This page aims to be a technical demo for the website as well as a means of docu
 The site is built with [Jekyll](https://jekyllrb.com/), a [static site generator](https://en.wikipedia.org/wiki/Static_site_generator)
 written in Ruby. Jekyll takes a [structured directory](https://jekyllrb.com/docs/structure/) as input,
 and, after processing, outputs a `_site` directory which can be served by most web servers or
-[hosting providers](https://jekyllrb.com/docs/deployment/third-party/).
-
-For the time being it is hosted on [GitHub Pages](https://pages.github.com/), which uses Jekyll by
-default, and is deployed through the [default action](https://github.blog/changelog/2021-12-16-github-pages-using-github-actions-for-builds-and-deployments-for-public-repositories/).
-At some point it may be worth using a [custom action](https://github.blog/2022-08-10-github-pages-now-uses-actions-by-default/),
-which would allow updating dependencies or using plugins not supported by
-[default](https://pages.github.com/versions/)[^github-pages-plugins].
+[hosting providers](https://jekyllrb.com/docs/deployment/third-party/). For the time being it is hosted on
+[GitHub Pages](https://pages.github.com/), which uses Jekyll by default, and is deployed through a
+[custom workflow](https://docs.github.com/en/pages/getting-started-with-github-pages/configuring-a-publishing-source-for-your-github-pages-site#publishing-with-a-custom-github-actions-workflow),
+which allows updating [dependencies](https://pages.github.com/versions/) or using custom
+plugins[^github-pages-plugins].
 
 ## Markup
 
