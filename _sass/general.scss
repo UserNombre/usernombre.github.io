@@ -47,6 +47,12 @@ a {
     text-decoration: none;
 }
 
+//// CSS attributes
+
+span[title] {
+    text-decoration: underline $color-primary-light dotted;
+}
+
 //// CSS pseudo-classes
 
 a:hover, a:focus {
@@ -66,10 +72,9 @@ h1:target, h2:target {
 }
 
 // Highlight footnotes
-*[role=doc-endnote]:target {
-    outline: $color-secondary-light dashed 2px;
-    outline-offset: 2px;
-    transition: outline-color 1s;
+li[role=doc-endnote]:target,
+sup[role=doc-noteref]:target a {
+    animation: flash 2s;
 }
 
 //// CSS pseudo-elements
@@ -132,5 +137,14 @@ details[open] h1::before {
 @keyframes blink {
     50% {
         opacity: 0.0;
+    }
+}
+
+@keyframes flash {
+    from {
+        background: $color-secondary;
+    }
+    to {
+        background: transparent;
     }
 }
