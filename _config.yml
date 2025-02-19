@@ -3,7 +3,7 @@ author: UserNombre
 
 url: "https://usernombre.github.io"
 baseurl: ""
-permalink: "/:year/:month/:day/:title:output_ext"
+permalink: "/:year/:month/:title:output_ext"
 
 markdown: kramdown
 highlighter: rouge
