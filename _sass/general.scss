@@ -132,6 +132,14 @@ details[open] h1::before {
     font-family: $font-monospace, math;
 }
 
+.selectable {
+    user-select: text;
+}
+
+.unselectable {
+    user-select: none;
+}
+
 /// Animations
 
 @keyframes blink {

@@ -24,6 +24,7 @@ code.highlighter-rouge {
 div.highlighter-rouge {
     overflow: auto;
     padding: 8px;
+    border: 1px solid $color-gray-light;
     border-radius: 6px;
     background-color: $color-gray-dark;
 }
