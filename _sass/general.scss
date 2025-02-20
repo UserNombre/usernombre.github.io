@@ -74,6 +74,7 @@ h1:target, h2:target {
 // Highlight footnotes
 li[role=doc-endnote]:target,
 sup[role=doc-noteref]:target a {
+    border-radius: 2px;
     animation: flash 2s;
 }
 
@@ -143,16 +144,13 @@ details[open] h1::before {
 /// Animations
 
 @keyframes blink {
-    50% {
-        opacity: 0.0;
-    }
+    50%     { opacity: 0.0; }
 }
 
 @keyframes flash {
-    from {
-        background: $color-secondary;
-    }
-    to {
-        background: transparent;
-    }
+    0%      { background: transparent; }
+    25%     { background: $color-secondary; }
+    50%     { background: transparent; }
+    75%     { background: $color-secondary; }
+    100%    { background: transparent; }
 }
