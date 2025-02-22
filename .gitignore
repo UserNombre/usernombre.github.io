@@ -1,4 +1,5 @@
-/.bundle
+/.bundle/*
+!/.bundle/config
 /.sass-cache
 /_site
 /_drafts
