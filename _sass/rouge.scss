@@ -1,5 +1,9 @@
 // https://github.com/rouge-ruby/rouge/blob/master/lib/rouge/token.rb
 .highlight {
+    // :Text
+    .w {
+        user-select: none;
+    }
     // :Name
     .n, .na, .nb, .bp, .nc, .no, .nd, .ni, .ne, .nf, .fm, .py, .nl, .nn, .nx, .nt, .nv, .vc, .vg, .vi, .vm {
         color: $color-secondary;
@@ -7,6 +11,25 @@
     // :Literal
     .l, .ld, .s, .sa, .sb, .sc, .dl, .sd, .s2, .se, .sh, .si, .sx, .sr, .s1, .ss, .m, .mb, .mf, .mh, .mi, .il, .mo, .mx {
         color: $color-primary;
+    }
+    // :Comment
+    .c, .ch, .cd, .cm, .c1, .cs {
+        color: $color-gray-lightest;
+    }
+    .cp, {
+        color: $color-secondary;
+    }
+    .cpf {
+        color: $color-primary;
+    }
+    // :Generic
+    .gp {
+        color: $color-primary;
+        user-select: none;
+    }
+    .go {
+        // FIXME: use a color diffrent from that of cursor selection
+        color: $color-gray-lightest;
     }
 }
 
