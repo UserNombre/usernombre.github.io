@@ -1,7 +1,8 @@
 <header id="header">
     <span id="header-left">
-        {%- assign url = page.url | remove_first: "/" | split: "/" -%}
-        <a href="/">..</a>/
+    {%- if page.name == "index.html" -%}~{%- else %}
+        <a href="/">~</a>/
+        {%- assign url = page.url | remove_first: "/" | split: "/" %}
         {%- for url_component in url -%}
             {%- assign href = href | append: "/" | append: url_component -%}
             {%- unless forloop.last -%}
@@ -9,15 +10,14 @@
             {%- endunless -%}
         {%- endfor -%}
         {{ url.last}}
+    {%- endif %}
     </span>
-    {%- if page.id -%}
+    {%- if page.id %}
     <span id="header-right">
-        {%- if page.last_modified -%}
-        [<a href="https://github.com/UserNombre/usernombre.github.io/commits/main/{{ page.path }}">+</a>]
-        <time datetime="{{ page.last_modified | date_to_xmlschema }}">{{ page.last_modified | date: "%Y-%m-%d" }}</time>
-        {%- else -%}
+        {%- if page.last_modified %}
+        [<a href="https://github.com/UserNombre/usernombre.github.io/commits/main/{{ page.path }}">*</a>]
+        {%- endif %}
         <time datetime="{{ page.date | date_to_xmlschema }}">{{ page.date | date: "%Y-%m-%d" }}</time>
-        {%- endif -%}
     </span>
-    {%- endif -%}
+    {%- endif %}
 </header>
