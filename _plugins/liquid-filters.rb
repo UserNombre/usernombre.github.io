@@ -1,3 +1,5 @@
+require "uri"
+
 module Jekyll
   module CodepathFilter
     attr_accessor :repositories
@@ -114,6 +116,16 @@ module Jekyll
       return html
     end
   end
+
+  module ResourceFilter
+    def generate_resource(uri, resource = nil, source = nil)
+      uri = URI.parse(uri)
+      resource ||= uri.path.split("/").last
+      source ||= uri.host
+      return "<a href='#{uri}'>#{resource}</a>, #{source}"
+    end
+  end
 end
 
 Liquid::Template.register_filter(Jekyll::CodepathFilter)
+Liquid::Template.register_filter(Jekyll::ResourceFilter)
