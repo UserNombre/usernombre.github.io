@@ -79,7 +79,11 @@ module Jekyll
         definition = self.definitions[node["call"]]
         html = definition.dig("symbol") || node["call"]
       end
-      html = "<span class='selectable'>#{html}</span>"
+      classes = ["selectable"]
+      if node.key?("highlight")
+        classes << "relevant"
+      end
+      html = "<span class='#{classes.join(" ")}'>#{html}</span>"
       # FIXME: comment/footnotes style
       # https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Roles/tooltip_role#escape
       if node.key?("comment")
