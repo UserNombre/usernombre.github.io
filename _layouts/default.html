@@ -1,8 +1,6 @@
 <html>
     <head>
-        <title>
-            {{ page.title | default: site.title }}
-        </title>
+        <title>{{ page.title | default: site.title }}</title>
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
         <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch&family=Inconsolata&display=swap">
@@ -11,9 +9,7 @@
         <link rel="icon" href="/assets/images/favicon.ico"/>
     </head>
     <body>
-        {%- if page.name != "index.html" -%}
-            {%- include header.html %}
-        {%- endif -%}
+        {% include header.html %}
         <main>
             {{ content }}
         </main>
