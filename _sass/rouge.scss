@@ -14,7 +14,7 @@
     }
     // :Comment
     .c, .ch, .cd, .cm, .c1, .cs {
-        color: $color-gray-lightest;
+        color: $color-gray-light;
     }
     .cp, {
         color: $color-secondary;
@@ -28,8 +28,7 @@
         user-select: none;
     }
     .go {
-        // FIXME: use a color diffrent from that of cursor selection
-        color: $color-gray-lightest;
+        color: $color-gray-light;
     }
 }
 
@@ -38,15 +37,15 @@ pre {
     margin: 0;
 }
 
-code.highlighter-rouge {
-    padding: 2px;
-    border-radius: 6px;
-    background-color: $color-gray-light;
+:not(a) > code.highlighter-rouge {
+    color: $color-secondary-light;
 }
 
 div.highlighter-rouge {
     overflow: auto;
+    scrollbar-width: thin;
     padding: 8px;
+    margin: 16px 0px 16px 0px;
     border: 1px solid $color-gray-light;
     border-radius: 6px;
     background-color: $color-gray-dark;
