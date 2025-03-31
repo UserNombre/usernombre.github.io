@@ -1,0 +1,653 @@
+repositories:
+  bash:
+    format: "https://github.com/bminor/bash/blob/bash-5.2/${file}#L${line}"
+  glibc:
+    format: "https://elixir.bootlin.com/glibc/glibc-2.41/source/${file}#L${line}"
+  linux:
+    format: "https://elixir.bootlin.com/linux/v6.12/source/${file}#L${line}"
+  x86:
+    format: "https://www.felixcloutier.com/x86/${file}"
+
+definitions:
+  # bash types
+  command_type:
+    repository: "bash"
+    file: "command.h"
+    line: 71
+
+  # bash functions
+  reader_loop:
+    repository: "bash"
+    file: "eval.c"
+    line: 57
+  parse_command:
+    repository: "bash"
+    file: "eval.c"
+    line: 323
+  read_command:
+    repository: "bash"
+    file: "eval.c"
+    line: 360
+  execute_command:
+    repository: "bash"
+    file: "execute_cmd.c"
+    line: 401
+  execute_command_internal:
+    repository: "bash"
+    file: "execute_cmd.c"
+    line: 573
+  execute_simple_command:
+    repository: "bash"
+    file: "execute_cmd.c"
+    line: 4355
+  execute_disk_command:
+    repository: "bash"
+    file: "execute_cmd.c"
+    line: 5586
+  shell_execve:
+    repository: "bash"
+    file: "execute_cmd.c"
+    line: 5948
+  search_for_command:
+    repository: "bash"
+    file: "findcmd.c"
+    line: 336
+  WAITPID:
+    repository: "bash"
+    file: "jobs.c"
+    line: 124
+  add_process:
+    repository: "bash"
+    file: "jobs.c"
+    line: 1488
+  make_child:
+    repository: "bash"
+    file: "jobs.c"
+    line: 2121
+  wait_for:
+    repository: "bash"
+    file: "jobs.c"
+    line: 2899
+  waitchld:
+    repository: "bash"
+    file: "jobs.c"
+    line: 3764
+  make_bare_simple_command:
+    repository: "bash"
+    file: "make_cmd.c"
+    line: 496
+  make_simple_command:
+    repository: "bash"
+    file: "make_cmd.c"
+    line: 519
+  bash_main:
+    repository: "bash"
+    file: "shell.c"
+    line: 370
+    symbol: "main"
+  shell_initialize:
+    repository: "bash"
+    file: "shell.c"
+    line: 1928
+  yyparse:
+    repository: "bash"
+    file: "y.tab.c"
+    line: 1700
+
+  # glibc functions
+  __libc_fork:
+    repository: "glibc"
+    file: "posix/fork.c"
+    line: 40
+  __run_prefork_handlers:
+    repository: "glibc"
+    file: "posix/register-atfork.c"
+    line: 113
+  __run_postfork_handlers:
+    repository: "glibc"
+    file: "posix/register-atfork.c"
+    line: 167
+  waitpid:
+    repository: "glibc"
+    file: "posix/waitpid.c"
+    line: 36
+    symbol: "waitpid"
+  _Fork:
+    repository: "glibc"
+    file: "sysdeps/nptl/_Fork.c"
+    line: 23
+  fork_system_setup:
+    repository: "glibc"
+    file: "sysdeps/nptl/fork.h"
+    line: 32
+  reclaim_stacks:
+    repository: "glibc"
+    file: "sysdeps/nptl/fork.h"
+    line: 58
+  INLINE_SYSCALL_CALL:
+    repository: "glibc"
+    file: "sysdeps/unix/sysdep.h"
+    line: 111
+  arch_fork:
+    repository: "glibc"
+    file: "sysdeps/unix/sysv/linux/arch-fork.h"
+    line: 35
+  DO_CALL:
+    repository: "glibc"
+    file: "sysdeps/unix/sysv/linux/x86_64/sysdep.h"
+    line: 20
+  execve:
+    repository: "glibc"
+    file: "sysdeps/unix/sysv/linux/syscalls.list"
+    line: 12
+
+  # linux configurations
+  VMAP_STACK:
+    repository: "linux"
+    file: "arch/Kconfig"
+    line: 1057
+  SCHED_SMT:
+    repository: "linux"
+    file: "arch/x86/Kconfig"
+    line: 1057
+  SCHED_CORE:
+    repository: "linux"
+    file: "kernel/Kconfig.preempt"
+    line: 118
+
+  # linux constants
+  TASK_threadsp:
+    repository: "linux"
+    file: "arch/x86/kernel/asm-offsets.c"
+    line: 37
+
+  # linux types
+  pt_regs:
+    repository: "linux"
+    file: "arch/x86/include/asm/ptrace.h"
+    line: 103
+  inactive_task_frame:
+    repository: "linux"
+    file: "arch/x86/include/asm/switch_to.h"
+    line: 23
+  fork_frame:
+    repository: "linux"
+    file: "arch/x86/include/asm/switch_to.h"
+    line: 44
+
+  # linux functions
+  sys_execve:
+    repository: "linux"
+    file: "fs/exec.c"
+    line: 2087
+  syscall_enter_from_user_mode:
+    repository: "linux"
+    file: "include/linux/entry-common.h"
+    line: 190
+  exit_to_user_mode_prepare:
+    repository: "linux"
+    file: "include/linux/entry-common.h"
+    line: 317
+  copy_io:
+    repository: "linux"
+    file: "include/linux/iocontext.h"
+    line: 122
+  copy_semundo:
+    repository: "linux"
+    file: "ipc/sem.c"
+    line: 2306
+  dup_task_struct:
+    repository: "linux"
+    file: "kernel/fork.c"
+    line: 1101
+  sys_clone:
+    repository: "linux"
+    file: "kernel/fork.c"
+    line: 2913
+  kernel_clone:
+    repository: "linux"
+    file: "kernel/fork.c"
+    line: 2745
+  copy_process:
+    repository: "linux"
+    file: "kernel/fork.c"
+    line: 1988
+  copy_mm:
+    repository: "linux"
+    file: "kernel/fork.c"
+    line: 1697
+  copy_fs:
+    repository: "linux"
+    file: "kernel/fork.c"
+    line: 1735
+  copy_files:
+    repository: "linux"
+    file: "kernel/fork.c"
+    line: 1756
+  copy_sighand:
+    repository: "linux"
+    file: "kernel/fork.c"
+    line: 1786
+  copy_signal:
+    repository: "linux"
+    file: "kernel/fork.c"
+    line: 1835
+  copy_namespaces:
+    repository: "linux"
+    file: "kernel/nsproxy.c"
+    line: 151
+  get_task_pid:
+    repository: "linux"
+    file: "kernel/pid.c"
+    line: 451
+  pid_vnr:
+    repository: "linux"
+    file: "kernel/pid.c"
+    line: 499
+  exit_to_user_mode_loop:
+    repository: "linux"
+    file: "kernel/entry/common.c"
+    line: 90
+  __syscall_exit_to_user_mode_work:
+    repository: "linux"
+    file: "kernel/entry/common.c"
+    line: 203
+  syscall_exit_to_user_mode:
+    repository: "linux"
+    file: "kernel/entry/common.c"
+    line: 215
+  sched_fork:
+    repository: "linux"
+    file: "kernel/sched/core.c"
+    line: 4666
+  wake_up_new_task:
+    repository: "linux"
+    file: "kernel/sched/core.c"
+    line: 4804
+  prepare_task_switch:
+    repository: "linux"
+    file: "kernel/sched/core.c"
+    line: 5127
+  schedule_tail:
+    repository: "linux"
+    file: "kernel/sched/core.c"
+    line: 5247
+  finish_task_switch:
+    repository: "linux"
+    file: "kernel/sched/core.c"
+    line: 5045
+  context_switch:
+    repository: "linux"
+    file: "kernel/sched/core.c"
+    line: 5272
+  pick_next_task:
+    repository: "linux"
+    file: "kernel/sched/core.c"
+    line: 6044
+  __schedule:
+    repository: "linux"
+    file: "kernel/sched/core.c"
+    line: 6548
+  __schedule_loop:
+    repository: "linux"
+    file: "kernel/sched/core.c"
+    line: 6766
+  schedule:
+    repository: "linux"
+    file: "kernel/sched/core.c"
+    line: 6775
+  IBRS_EXIT:
+    repository: "linux"
+    file: "arch/x86/entry/calling.h"
+    line: 328
+  do_syscall_x64:
+    repository: "linux"
+    file: "arch/x86/entry/common.c"
+    line: 42
+  do_syscall_64:
+    repository: "linux"
+    file: "arch/x86/entry/common.c"
+    line: 76
+  entry_SYSCALL_64:
+    repository: "linux"
+    file: "arch/x86/entry/entry_64.S"
+    line: 87
+  __switch_to_asm:
+    repository: "linux"
+    file: "arch/x86/entry/entry_64.S"
+    line: 177
+  ret_from_fork_asm:
+    repository: "linux"
+    file: "arch/x86/entry/entry_64.S"
+    line: 227
+  swapgs_restore_regs_and_return_to_usermode:
+    repository: "linux"
+    file: "arch/x86/entry/entry_64.S"
+    line: 560
+  x64_sys_call:
+    repository: "linux"
+    file: "arch/x86/entry/syscall_64.c"
+    line: 30
+  switch_to:
+    repository: "linux"
+    file: "arch/x86/include/asm/switch_to.h"
+    line: 49
+  ret_from_fork:
+    repository: "linux"
+    file: "arch/x86/kernel/process.c"
+    line: 140
+  copy_thread:
+    repository: "linux"
+    file: "arch/x86/kernel/process.c"
+    line: 159
+  __switch_to:
+    repository: "linux"
+    file: "arch/x86/kernel/process_64.c"
+    line: 610
+
+  syscall:
+    repository: "x86"
+    file: "syscall"
+    line: 0
+  swapgs:
+    repository: "x86"
+    file: "swapgs"
+    line: 0
+  iretq:
+    repository: "x86"
+    file: "iret:iretd:iretq"
+    line: 0
+  sysretq:
+    repository: "x86"
+    file: "sysret"
+    line: 0
+
+codepaths:
+  bash_repl:
+    - call: "bash_main"
+      children:
+        - line: 580
+          call: "shell_initialize"
+        - line: 833
+          call: "reader_loop"
+          children:
+            - line: 139
+              call: "read_command"
+              highlight: true
+            - line: 171
+              call: "execute_command"
+              highlight: true
+  bash_read:
+    - line: 139
+      call: "read_command"
+      children:
+        - line: 392
+          call: "parse_command"
+          children:
+            - line: 348
+              call: "yyparse"
+              children:
+                - line: 2532
+                  call: "make_simple_command"
+                  children:
+                    - line: 528
+                      call: "make_bare_simple_command"
+                      children:
+                        - line: 509
+                          code: "command->type = cm_simple"
+  bash_execute:
+    - line: 171
+      call: "execute_command"
+      children:
+        - line: 413
+          call: "execute_command_internal"
+          children:
+            - line: 866
+              call: "execute_simple_command"
+              children:
+                - line: 4811
+                  call: "execute_disk_command"
+                  children:
+                    - line: 5628
+                      call: "search_for_command"
+                    - line: 5652
+                      call: "make_child"
+                      children:
+                        - line: 2164
+                          code: "fork"
+                          highlight: true
+  fork_user:
+    - call: "__libc_fork"
+      children:
+        - line: 51
+          call: "__run_prefork_handlers"
+          children:
+        - line: 75
+          call: "_Fork"
+          children:
+            - line: 33
+              call: "arch_fork"
+              children:
+                - line: 50
+                  call: "syscall"
+                  comment: "Intermediate macros are omitted"
+                  highlight: true
+  syscall:
+    - call: "entry_SYSCALL_64"
+      children:
+        - line: 121
+          call: "do_syscall_64"
+          children:
+            - line: 83
+              call: "do_syscall_x64"
+              children:
+                - line: 83
+                  call: "x64_sys_call"
+                  children:
+                    - call: "sys_clone"
+                      highlight: true
+  fork_kernel:
+    - call: "sys_clone"
+      comment: "Final symbol after expanding SYSCALL_DEFINE5"
+      children:
+        - line: 2929
+          call: "kernel_clone"
+          children:
+            - line: 2671
+              call: "copy_process"
+              children:
+                - line: 2204
+                  call: "dup_task_struct"
+                - line: 2344
+                  call: "sched_fork"
+                  children:
+                    - line: 4674
+                      code: "p->__state = TASK_NEW"
+                      highlight: true
+                - line: 2359
+                  call: "copy_semundo"
+                - line: 2362
+                  call: "copy_files"
+                - line: 2365
+                  call: "copy_sighand"
+                - line: 2368
+                  call: "copy_signal"
+                - line: 2371
+                  call: "copy_fs"
+                - line: 2374
+                  call: "copy_mm"
+                - line: 2377
+                  call: "copy_namespaces"
+                - line: 2380
+                  call: "copy_io"
+                - line: 2383
+                  call: "copy_thread"
+                  highlight: true
+                  children:
+                    - line: 175
+                      code: "frame->ret_addr = ret_from_fork_asm"
+                      highlight: "background"
+                    - code: "p->thread.sp = fork_frame"
+                      highlight: "background"
+                    - code: "*childregs = *current_pt_regs()"
+                      highlight: "background"
+            - line: 2702
+              call: "wake_up_new_task"
+              children:
+                - line: 4811
+                  code: "WRITE_ONCE(p->__state, TASK_RUNNING)"
+                  highlight: true
+            - line: 2683
+              call: "get_task_pid"
+              code: "pid = get_task_pid(p, PIDTYPE_PID)"
+            - line: 2684
+              call: "pid_vnr"
+              code: "nr = pid_vnr(pid)"
+              footnote: "linux-namespaces"
+            - line: 2714
+              code: "return nr"
+              comment: "Return child pid"
+  parent_return:
+    - call: "entry_SYSCALL_64"
+      children:
+        - line: 121
+          call: "do_syscall_64"
+          comment: "Set EAX to specify return mode"
+        - line: 138
+          call: "IBRS_EXIT"
+        - line: 166
+          call: "sysretq"
+          highlight: true
+  parent_fork:
+    - call: "execute_command_internal"
+      children:
+        - line: 866
+          call: "execute_simple_command"
+          children:
+            - line: 4811
+              call: "execute_disk_command"
+              children:
+                - line: 5652
+                  call: "make_child"
+                  children:
+                    - line: 2164
+                      call: "__libc_fork"
+                      code: "fork"
+                      children:
+                        - line: 132
+                          call: "__run_postfork_handlers"
+                          footnote: "libc-postfork"
+        - line: 911
+          call: "wait_for"
+          children:
+            - line: 2980
+              call: "waitchld"
+              children:
+                - line: 3800
+                  call: "waitpid"
+                  comment: "The actual call depends on the WAITPID macro"
+  syscall_schedule:
+    - call: "entry_SYSCALL_64"
+      children:
+        - line: 121
+          call: "do_syscall_64"
+          children:
+            - line: 89
+              call: "syscall_exit_to_user_mode"
+              children:
+                - line: 218
+                  call: "__syscall_exit_to_user_mode_work"
+                  children:
+                    - line: 207
+                      call: "exit_to_user_mode_prepare"
+                      children:
+                        - line: 328
+                          call: "exit_to_user_mode_loop"
+                          children:
+                            - line: 102
+                              call: "schedule"
+  task_switch:
+    - call: "schedule"
+      children:
+        - line: 6785
+          call: "__schedule_loop"
+          code: "__schedule_loop(SM_NONE)"
+          children:
+            #- line: 6769
+            #  call: "preempt_disable"
+            - line: 6770
+              call: "__schedule"
+              children:
+                - line: 6647
+                  call: "pick_next_task"
+                  footnote: "linux-core-scheduling"
+                - line: 6693
+                  call: "context_switch"
+                  children:
+                    - line: 5275
+                      call: "prepare_task_switch"
+                    - line: 5328
+                      call: "switch_to"
+                      children:
+                        - line: 51
+                          call: "__switch_to_asm"
+                          children:
+                            - line: 190
+                              code: "movq %rsp, TASK_threadsp(%rdi)"
+                              highlight: "background"
+                            - code: "movq TASK_threadsp(%rsi), %rsp"
+                              highlight: "background"
+                            - line: 215
+                              call: "__switch_to"
+                    - line: 5331
+                      call: "finish_task_switch"
+            #- line: 6771
+            #  call: "sched_preempt_enable_no_resched"
+            #- line: 6772
+            #  call: "need_resched"
+  child_return:
+    - call: "ret_from_fork_asm"
+      children:
+        - line: 244
+          call: "ret_from_fork"
+          children:
+            - line: 143
+              call: "schedule_tail"
+            - line: 156
+              call: "syscall_exit_to_user_mode"
+        - line: 257
+          call: "swapgs_restore_regs_and_return_to_usermode"
+          note: "Assuming FRED is not enabled"
+          footnote: "intel-fred"
+          children:
+            - line: 561
+              call: "IBRS_EXIT"
+              footnote: "intel-speculation"
+            - line: 575
+              call: "swapgs"
+            - line: 659
+              call: "iretq"
+              highlight: true
+  child_fork:
+    - call: "execute_disk_command"
+      children:
+        - line: 5652
+          call: "make_child"
+          children:
+            - line: 2164
+              call: "__libc_fork"
+              code: "fork"
+              children:
+                - line: 79
+                  call: "fork_system_setup"
+                - line: 110
+                  call: "reclaim_stacks"
+                - line: 113
+                  call: "__run_postfork_handlers"
+                  footnote: "libc-postfork"
+        - line: 5749
+          call: "shell_execve"
+          children:
+            - line: 5957
+              code: "execve"
+              highlight: true
