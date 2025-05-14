@@ -1,25 +1,93 @@
 require "uri"
 
 module Jekyll
-  module CodepathFilter
+  module SourceCodeFilter
     attr_accessor :repositories
     attr_accessor :definitions
+    attr_accessor :codepaths
     attr_accessor :tab_width
     attr_accessor :last_repository
     attr_accessor :debug
 
-    def generate_codepath(name, yaml, width)
+    def configure_sourcecode_data(yaml)
+      normalize_yaml(yaml)
       self.repositories = yaml["repositories"]
       self.definitions = yaml["definitions"]
+      self.codepaths = yaml["codepaths"]
+      return ""
+    end
+
+    def generate_definition_link(name)
+      html = ""
+      if self.definitions.include?(name)
+        definition = self.definitions[name]
+        repository = self.repositories[definition["repository"]]
+        if definition.include?("symbol")
+            name = definition["symbol"]
+        end
+
+        url = repository["format"]
+          .gsub("${file}", definition["file"])
+          .gsub("${line}", definition["line"].to_s)
+        html = "<a href='#{url}'><code>#{name}</code></a>"
+      end
+      return html
+    end
+
+    def generate_file_link(content, repository, file, line = nil)
+      html = ""
+      if self.repositories.include?(repository)
+        content = content.empty? ? file : content
+        repository = self.repositories[repository]
+        if line == nil
+          url = repository["format"]
+            .gsub(/\$\{file\}.*/, file)
+        else
+          url = repository["format"]
+            .gsub("${file}", file)
+            .gsub("${line}", line.to_s)
+        end
+        html = "<a href='#{url}'>#{content}</a>"
+      end
+      return html
+    end
+
+    def generate_codepath(name, width = 4)
       self.tab_width = width
       self.last_repository = nil
       self.debug = ENV["JEKYLL_ENV"] == "development"
       if self.debug
         puts "Generating codepath for #{name}"
       end
-      inner = generate_lines(nil, yaml["codepaths"][name], 0)
+      inner = generate_lines(nil, self.codepaths[name], 0)
       html = "<div class='highlighter-rouge unselectable'><pre><code>#{inner}</code></pre></div>"
       return html
+    end
+
+    private
+
+    def normalize_yaml(yaml)
+      yaml["codepaths"]&.each do |key, codepath|
+        normalize_codepath(codepath)
+      end
+    end
+
+    def normalize_codepath(codepath)
+      codepath&.each do |node|
+        node["line"] = node.fetch("line", nil)
+        node["call"] = node.fetch("call", nil)
+        node["code"] = node.fetch("code", nil)
+        node["comment"] = node.fetch("comment", nil)
+        node["footnote"] = node.fetch("footnote", nil)
+        node["highlight"] = node.fetch("highlight", [])
+        if node["highlight"].is_a?(String)
+          node["highlight"] = [node["highlight"]]
+        elsif not node["highlight"].is_a?(Array)
+          node["highlight"] = ["foreground"]
+        end
+        node["children"] = node.fetch("children", [])
+        normalize_codepath(node["children"])
+      end
     end
 
     def generate_lines(parent, nodes, depth)
@@ -34,7 +102,7 @@ module Jekyll
           return nil
         end
         html += "#{line}\n"
-        if node.key?("children")
+        if node["children"]
           lines = generate_lines(node, node["children"], depth + 1)
           if lines == nil
             return nil
@@ -46,8 +114,8 @@ module Jekyll
     end
 
     def generate_line(parent, node, depth)
-      if node.key?("call") && self.definitions[node["call"]] == nil
-        puts "Invalid key #{node["call"]}"
+      if node["call"] && self.definitions[node["call"]] == nil
+        puts "Invalid key '#{node["call"]}'"
         return nil
       end
       html = ""
@@ -59,7 +127,7 @@ module Jekyll
 
     def generate_indentation(parent, node, depth)
       html = ""
-      if parent == nil or not node.key?("line")
+      if parent == nil or node["line"] == nil
         html = " " * self.tab_width * depth
       else
         html = " " * self.tab_width * (depth - 1)
@@ -75,23 +143,25 @@ module Jekyll
 
     def generate_code(parent, node)
       html = ""
-      if node.key?("code")
+      if node["code"]
         html = node["code"]
-      elsif node.key?("call")
+      elsif node["call"]
         definition = self.definitions[node["call"]]
         html = definition.dig("symbol") || node["call"]
       end
       classes = ["selectable"]
-      if node.key?("highlight")
-        classes << "relevant"
+      if node["highlight"].include?("foreground")
+        classes << "codepath-hl-fg"
+      elsif node["highlight"].include?("background")
+        classes << "codepath-hl-bg"
       end
       html = "<span class='#{classes.join(" ")}'>#{html}</span>"
       # FIXME: comment/footnotes style
       # https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Roles/tooltip_role#escape
-      if node.key?("comment")
+      if node["comment"]
         html = "<span title='#{node["comment"]}'>#{html}</span>"
       end
-      if node.key?("footnote")
+      if node["footnote"]
         html += "<span markdown='1'>[^#{node["footnote"]}]</span>"
       end
       return html
@@ -99,7 +169,7 @@ module Jekyll
 
     def generate_definition(parent, node)
       html = ""
-      if node.key?("call")
+      if node["call"]
         definition = self.definitions[node["call"]]
         repository = self.repositories[definition["repository"]]
         url = repository["format"]
@@ -127,5 +197,5 @@ module Jekyll
   end
 end
 
-Liquid::Template.register_filter(Jekyll::CodepathFilter)
+Liquid::Template.register_filter(Jekyll::SourceCodeFilter)
 Liquid::Template.register_filter(Jekyll::ResourceFilter)
