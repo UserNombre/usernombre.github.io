@@ -2,15 +2,14 @@
 layout: default
 ---
 
-<header>
-    <details>
-        <summary>
-            <h1>{{ site.title }}</h1>
-        </summary>
-        <div>
-            <a class="item" href="/categories">Categories</a>
-            <a class="item" href="/tags">Tags</a>
-        </div>
-    </details>
-</header>
+<details>
+    <summary>
+        <h1>{{ site.title }}</h1>
+    </summary>
+    <div>
+        <a class="item" href="/categories">Categories</a>
+        <a class="item" href="/tags">Tags</a>
+    </div>
+</details>
+
 {%- include post_list.html posts=site.posts -%}

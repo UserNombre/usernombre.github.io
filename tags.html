@@ -3,13 +3,12 @@ layout: default
 title: tags
 ---
 
-<header>
-    <h1>tags</h1>
-</header>
+<h1>tags</h1>
+
 <ul>
 {%- for tag in site.tags %}
     <li>
-      <a href="{{ tag[0] | prepend: "/tags/" | append: "/" }}">{{ tag[0] }}</a>
+        <a href="{{ tag[0] | prepend: "/tags/" | append: "/" }}">{{ tag[0] }}</a>
     </li>
 {%- endfor %}
 </ul>
