@@ -7,9 +7,13 @@ permalink: "/:year/:month/:title:output_ext"
 
 markdown: kramdown
 highlighter: rouge
+sass:
+  silence_deprecations:
+    - import
+    - global-builtin
 plugins:
-  - jekyll-feed
   - jekyll-archives
+  - jekyll-feed
 
 jekyll-archives:
   enabled: all
