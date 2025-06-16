@@ -2,6 +2,8 @@
 
 html {
     scroll-behavior: smooth;
+    // Exclude header from the scrollport
+    scroll-padding-top: 2em;
 }
 
 body {
@@ -22,16 +24,30 @@ article {
 
 p {
     line-height: 1.35em;
-    margin-bottom: 0;
+    &:first-child {
+        margin-top: 0em;
+    }
+    &:last-child, &:has(+ ul) {
+        margin-bottom: 0em;
+    }
 }
 
 table, th, td {
-    padding: 16px;
+    padding: 1em;
     border: thin solid $color-gray-lightest;
     border-collapse: collapse;
 }
 
 code {
+    font-family: $font-monospace, monospace;
+}
+
+blockquote {
+    overflow: auto;
+    padding: 0.5em;
+    margin: 1em 0em 1em 0em;
+    border-left: 0.5em solid $color-secondary-dark;
+    border-radius: 0.4em;
     font-family: $font-monospace, monospace;
 }
 
@@ -42,7 +58,7 @@ summary {
 }
 
 a {
-    border-radius: 2px;
+    border-radius: 0.1em;
     color: $color-primary-light;
     text-decoration: none;
 }
@@ -55,12 +71,17 @@ ol > li {
 
 //// CSS attributes
 
+// Ensure references are well spaced
+li[id] {
+    margin-bottom: 1em;
+}
+
 span[title] {
     text-decoration: underline $color-secondary-light dotted;
 }
 
 sup[role=doc-noteref] a {
-    padding: 2px;
+    padding: 0.1em;
 }
 
 //// CSS pseudo-classes
@@ -85,7 +106,7 @@ h1:target, h2:target {
 // Highlight footnotes
 li[role=doc-endnote]:target,
 sup[role=doc-noteref]:target a {
-    border-radius: 2px;
+    border-radius: 0.1em;
     animation: flash 2s;
 }
 
@@ -102,7 +123,7 @@ li::marker {
 details h1::before {
     // Inline elements can't be transformed
     display: inline-block;
-    margin-right: 16px;
+    margin-right: 1em;
     font-family: $font-monospace, monospace;
     content: ">";
     transition: transform 0.1s;
@@ -116,9 +137,9 @@ details[open] h1::before {
 //// Custom classes
 
 .item {
-    padding: 4px;
+    padding: 0.25em;
     border: thin solid $color-gray-light;
-    border-radius: 8px;
+    border-radius: 0.5em;
     background-color: $color-gray-dark;
 }
 

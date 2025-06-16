@@ -44,9 +44,9 @@ pre {
 div.highlighter-rouge {
     overflow: auto;
     scrollbar-width: thin;
-    padding: 8px;
-    margin: 16px 0px 16px 0px;
-    border: 1px solid $color-gray-light;
-    border-radius: 6px;
+    padding: 0.5em;
+    margin: 1em 0em 1em 0em;
+    border: 0.1em solid $color-gray-light;
+    border-radius: 0.4em;
     background-color: $color-gray-dark;
 }
