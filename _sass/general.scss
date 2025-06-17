@@ -61,6 +61,15 @@ a {
     border-radius: 0.1em;
     color: $color-primary-light;
     text-decoration: none;
+    // Highlight links
+    &:hover, &:focus {
+        color: $color-background;
+        background: $color-primary;
+    }
+    &:active {
+        color: $color-foreground;
+        background: $color-primary;
+    }
 }
 
 // Fix spacing within ol
@@ -69,11 +78,14 @@ ol > li {
     margin-top: 0.25em;
 }
 
-//// CSS attributes
-
-// Ensure references are well spaced
-li[id] {
-    margin-bottom: 1em;
+li  {
+    &::marker {
+        color: $color-secondary-light;
+    }
+    // Ensure references are well spaced
+    &[id] {
+        margin-bottom: 1em;
+    }
 }
 
 span[title] {
@@ -84,17 +96,11 @@ sup[role=doc-noteref] a {
     padding: 0.1em;
 }
 
-//// CSS pseudo-classes
-
-// Highlight links
-a:hover, a:focus {
-    color: $color-background;
-    background: $color-primary;
-}
-
-a:active {
-    color: $color-foreground;
-    background: $color-primary;
+// Highlight footnotes
+li[role=doc-endnote]:target,
+sup[role=doc-noteref]:target a {
+    border-radius: 0.1em;
+    animation: flash 2s;
 }
 
 // Highlight headers
@@ -103,21 +109,8 @@ h1:target, h2:target {
     background: $color-secondary-darkest;
 }
 
-// Highlight footnotes
-li[role=doc-endnote]:target,
-sup[role=doc-noteref]:target a {
-    border-radius: 0.1em;
-    animation: flash 2s;
-}
-
-//// CSS pseudo-elements
-
 ::selection {
     background: $color-gray-lightest;
-}
-
-li::marker {
-    color: $color-secondary-light;
 }
 
 details h1::before {
@@ -134,7 +127,7 @@ details[open] h1::before {
     transform: rotate(90deg);
 }
 
-//// Custom classes
+//// Classes
 
 .item {
     padding: 0.25em;
@@ -175,6 +168,39 @@ details[open] h1::before {
 
 .unselectable {
     user-select: none;
+}
+
+.codepath-hl-fg {
+    color: $color-secondary-light;
+}
+
+.codepath-hl-bg {
+    padding: 0.1em;
+    background-color: $color-secondary-dark;
+}
+
+//// Identifiers
+
+#header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 100;
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    background: $color-secondary-dark;
+    font-family: $font-monospace, monospace;
+}
+
+#header-left {
+    margin: 0.1em;
+    text-align: left;
+}
+
+#header-right {
+    margin: 0.1em;
+    text-align: right;
 }
 
 /// Animations
