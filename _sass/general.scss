@@ -97,8 +97,8 @@ sup[role=doc-noteref] a {
 }
 
 // Highlight footnotes
-li[role=doc-endnote]:target,
-sup[role=doc-noteref]:target a {
+div[role=doc-endnotes] li:target,
+sup:target a[role=doc-noteref] {
     border-radius: 0.1em;
     animation: flash 2s;
 }
