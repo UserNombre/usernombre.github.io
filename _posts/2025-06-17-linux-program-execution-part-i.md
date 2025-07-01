@@ -5,6 +5,8 @@ category: articles
 tags: [linux, glibc, bash, internals]
 ---
 
+{{ site.data["linux-program-execution"] | configure_sourcecode_data }}
+
 > [!] This article is still under construction
 
 Recently, I've been looking at how Linux systems handle program execution. The Linux ecosystem is
@@ -69,6 +71,59 @@ This question is way more complex, as we are no longer asking about what takes p
 point of view but from that of the whole system. This, minus some details[^article-io], is what
 we'll be trying answer throughout the series.
 
+## Entrypoint
+
+For now, we'll start by seeing what is it that bash does with our input and how it decides to act
+based on it. The [REPL](https://en.wikipedia.org/wiki/Read%E2%80%93eval%E2%80%93print_loop) (Read
+Eval Print Loop) is the underlying idea that drives both [shells](https://en.wikipedia.org/wiki/Shell_(computing)#Command-line_shells)
+and [interpreters](https://en.wikipedia.org/wiki/Interpreter_(computing)). Generally, an environment
+that implements it will run a continuous loop that reads and parses user input, attempts to evaluate
+it according to a set of rules, and then returns its output (or an error if it should arise) to the
+user by printing it.
+
+In our specific case, after bash initializes itself, it enters `reader_loop`, which implements the
+main loop of the program. From within, it first carries out the **Read** part of the loop, by
+waiting for our input and processing it at `read_command`, which is followed by `execute_command`,
+where **Eval** and **Print** take place simultaneously[^bash].
+
+{{ "bash_repl" | generate_codepath }}
+
+Thankfully, parsing is, for the most part, a problem that has been long solved thanks to
+[parser generators](https://en.wikipedia.org/wiki/Compiler-compiler), which make writing and reading
+parsing code easier. [Bison](https://en.wikipedia.org/wiki/GNU_Bison) is used by bash to generate a
+[LALR parser](https://en.wikipedia.org/wiki/LALR_parser) by defining its grammar in
+[Yacc](https://en.wikipedia.org/wiki/Yacc) syntax (a mix of C code and notation similar to
+[Backus–Naur form](https://en.wikipedia.org/wiki/Backus%E2%80%93Naur_form)). The grammar itself
+resides in {{ "" | generate_file_link: "bash", "parse.y" }}, and when fed as input to Bison it
+generates the code in {{ "" | generate_file_link: "bash", "y.tab.c" }} and
+{{ "" | generate_file_link: "bash", "y.tab.h" }}.
+
+Both `read_command` and `parse_command` are thin wrappers around `yyparse`, which is the main
+parsing function. If we executed the example command from the introduction, or any executable for
+that matter, we would reach `make_simple_command`, and since we didn't do any redirections, it would
+simply call `make_bare_simple_command` and assign the corresponding {{ "command_type" | generate_definition_link }}
+to it.
+
+{{ "bash_read" | generate_codepath }}
+
+After the command has been parsed, `execute_command` calls `execute_command_internal`, which
+contains the logic that decides how to evaluate it. After a few hundred lines filled with
+conditionally compiled code and if statements which I don't fully understand, we reach a switch
+based on the `command_type`, and if we follow the `cm_simple` case, we eventually arrive at
+`execute_simple_command`. This function takes care of executing all trivial commands, including
+builtins and functions, but since our command is neither of them, it is assumed that it will be
+found on disk and `execute_disk_command` is called.
+
+Here is where the actual works gets done: `search_for_command` looks for the file in all directories
+within the `$PATH` environment variable, and if it finds it, `make_child` is called, which finally
+creates a new process by invoking the by now familiar `fork`. It also takes care of setting up
+signals and job control information for the new process, but we can ignore it.
+
+{{ "bash_execute" | generate_codepath }}
+
+We found what we were looking for, but now we are left with yet another question: where exactly does
+this `fork` call lead us to?
+
 ---
 
 [^article-code]:
@@ -85,3 +140,9 @@ we'll be trying answer throughout the series.
 [^article-io]:
     We won't be going over any of the I/O details, as that topic is complex enough that it would
     require a series of articles of their own.
+
+[^bash]:
+    Here we'll only explore how bash interacts with the operating system, but readers interested on
+    an overivew of its internals should definetely check out the chapter dedicated to bash in
+    [The Architecture of Open Source Applications](https://aosabook.org/en/v1/bash.html), which is
+    written by the main developer of bash, Chet Ramey.

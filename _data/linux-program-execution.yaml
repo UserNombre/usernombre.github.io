@@ -1,0 +1,126 @@
+repositories:
+  bash:
+    format: "https://github.com/bminor/bash/blob/bash-5.2/${file}#L${line}"
+
+definitions:
+  # bash types
+  command_type:
+    repository: "bash"
+    file: "command.h"
+    line: 71
+
+  # bash functions
+  reader_loop:
+    repository: "bash"
+    file: "eval.c"
+    line: 57
+  parse_command:
+    repository: "bash"
+    file: "eval.c"
+    line: 323
+  read_command:
+    repository: "bash"
+    file: "eval.c"
+    line: 360
+  execute_command:
+    repository: "bash"
+    file: "execute_cmd.c"
+    line: 401
+  execute_command_internal:
+    repository: "bash"
+    file: "execute_cmd.c"
+    line: 573
+  execute_simple_command:
+    repository: "bash"
+    file: "execute_cmd.c"
+    line: 4355
+  execute_disk_command:
+    repository: "bash"
+    file: "execute_cmd.c"
+    line: 5586
+  search_for_command:
+    repository: "bash"
+    file: "findcmd.c"
+    line: 336
+  make_child:
+    repository: "bash"
+    file: "jobs.c"
+    line: 2121
+  make_bare_simple_command:
+    repository: "bash"
+    file: "make_cmd.c"
+    line: 496
+  make_simple_command:
+    repository: "bash"
+    file: "make_cmd.c"
+    line: 519
+  bash_main:
+    repository: "bash"
+    file: "shell.c"
+    line: 370
+    symbol: "main"
+  shell_initialize:
+    repository: "bash"
+    file: "shell.c"
+    line: 1928
+  yyparse:
+    repository: "bash"
+    file: "y.tab.c"
+    line: 1700
+
+codepaths:
+  bash_repl:
+    - call: "bash_main"
+      children:
+        - line: 580
+          call: "shell_initialize"
+        - line: 833
+          call: "reader_loop"
+          children:
+            - line: 139
+              call: "read_command"
+              highlight: true
+            - line: 171
+              call: "execute_command"
+              highlight: true
+  bash_read:
+    - line: 139
+      call: "read_command"
+      children:
+        - line: 392
+          call: "parse_command"
+          children:
+            - line: 348
+              call: "yyparse"
+              highlight: true
+              children:
+                - line: 2532
+                  call: "make_simple_command"
+                  children:
+                    - line: 528
+                      call: "make_bare_simple_command"
+                      children:
+                        - line: 509
+                          code: "command->type = cm_simple"
+                          highlight: true
+  bash_execute:
+    - line: 171
+      call: "execute_command"
+      children:
+        - line: 413
+          call: "execute_command_internal"
+          children:
+            - line: 866
+              call: "execute_simple_command"
+              children:
+                - line: 4811
+                  call: "execute_disk_command"
+                  children:
+                    - line: 5628
+                      call: "search_for_command"
+                    - line: 5652
+                      call: "make_child"
+                      children:
+                        - line: 2164
+                          code: "fork"
+                          highlight: true
