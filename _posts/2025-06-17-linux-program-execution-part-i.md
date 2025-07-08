@@ -26,7 +26,7 @@ ones to deal with the execution of a new program and dynamic loading, among othe
 Additionally, for some tangential topics that are not covered here, I'll link to useful resources
 I've come across, which should provide a starting point for deeper exploration.
 
-This article is written with x86-64 systems in mind, as it is what I am most familiar with. Wherever
+This article is written with `x86-64` systems in mind, as it is what I am most familiar with. Wherever
 code is referenced, links to the source are provided to improve browsability[^article-code].
 
 ## Introduction
@@ -124,6 +124,83 @@ signals and job control information for the new process, but we can ignore it.
 We found what we were looking for, but now we are left with yet another question: where exactly does
 this `fork` call lead us to?
 
+## A fork in the road
+
+### User space
+
+In theory, the `fork` symbol could be pointing anywhere, maybe even to a custom definition within
+bash. In practice, however, we know that it must be defined within some system library, most likely
+within the [C standard library](https://en.wikipedia.org/wiki/C_standard_library). For most modern
+Linux distributions this is going to be [glibc](https://en.wikipedia.org/wiki/Glibc) (GNU C Library),
+but there are many other implementations, such as [musl](https://en.wikipedia.org/wiki/Musl) or
+[uclibc](https://en.wikipedia.org/wiki/UClibc).
+
+We can check this by ourselves quite easily. First of all, bash, like most executables, is linked
+dynamically, which means that it makes use of shared libraries whose symbols won't be available
+until run time. We can use [`ldd`](https://www.man7.org/linux/man-pages/man1/ldd.1.html) to list
+the libraries (technically shared objects) that are required by the executable.
+
+```console?prompt=$&output=highlighted
+$ file $(which bash)
+/usr/bin/bash: ELF 64-bit LSB pie executable, x86-64, version 1 (SYSV), <!dynamically linked!>, interpreter /lib64/ld-linux-x86-64.so.2, BuildID[sha1]=2de3add7685100c7a623a67e3dd128340642a02c, for GNU/Linux 3.2.0, stripped
+$ ldd $(which bash)
+        linux-vdso.so.1 (0x00007ffe7e5f7000)
+        libtinfo.so.6 => /lib/x86_64-linux-gnu/libtinfo.so.6 (0x00007b1fa46b9000)
+        <!libc.so.6 => /lib/x86_64-linux-gnu/libc.so.6!> (0x00007b1fa44c3000)
+        /lib64/ld-linux-x86-64.so.2 (0x00007b1fa4847000)
+```
+
+In the above output we can see that `libc.so.6` is resolved to `/lib/x86_64-linux-gnu/libc.so.6`,
+confirming that our system is using `glibc`. Using [`readelf`](https://www.man7.org/linux/man-pages/man1/readelf.1.html)
+we can look for `fork` in the symbol table and see that the executable declares an undefined
+reference to it, while the library defines it (symbols displayed by `readelf` are actually followed
+by `@`, but that is simply versioning information[^elf-versioning]).
+
+```console?prompt=$&output=highlighted
+$ readelf -s -W $(which bash) | grep fork@
+<!   217: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND fork@GLIBC_2.2.5 (2)!>
+$ readelf -s -W /lib/x86_64-linux-gnu/libc.so.6 | grep fork@
+   <...>
+   957: 00000000000e16d0  1188 FUNC    GLOBAL DEFAULT   16 __libc_fork@@GLIBC_PRIVATE
+  <!1117: 00000000000e16d0  1188 FUNC    WEAK   DEFAULT   16 fork@@GLIBC_2.2.5!>
+  1514: 00000000000e16d0  1188 FUNC    GLOBAL DEFAULT   16 __fork@@GLIBC_2.2.5
+   <...>
+```
+
+With this, we now know where we need to look in order to keep tracing our code. There's still the
+question of how execution flows from our executable into the library, but we'll leave that for some
+other time. For now, it will suffice to know that the executable works together with the dynamic
+linker in order to resolve undefined symbols at run time.
+
+This `fork` right here is not a [system call](https://www.man7.org/linux/man-pages/man2/syscalls.2.html)
+but merely a wrapper around one. In order to provide an interface that is both unified across
+architectures and convenient (as opposed to the [syscall](https://www.man7.org/linux/man-pages/man2/syscall.2.html)
+interface), there is a need to define a wrappers for every system call[^glibc-syscalls]. There are a
+few [ways](https://sourceware.org/glibc/wiki/SyscallWrappers) of defining them according to their
+requirements. Very simple system calls use an {{ "assembly template" | generate_file_link: "glibc", "sysdeps/unix/syscall-template.S" }}
+to generate their code, while more complex ones get their own C file.
+
+If we look for a function definition of `fork`, we won't really find anything. Instead, what we do
+find, is an [alias](https://gcc.gnu.org/onlinedocs/gcc/Common-Variable-Attributes.html#index-alias-variable-attribute)
+to `__libc_fork`. There some other weird stuff done {{ "below the definition" | generate_file_link: "glibc", "posix/fork.c", 140 }}, but it's not that relevant
+to our discussion[^glibc-symbols]. The first thing it does is call `__run_prefork_handlers`, which
+runs all handlers registered with [`pthread_atfork`](https://pubs.opengroup.org/onlinepubs/9799919799/functions/pthread_atfork.html)
+that should run before forking. After that, it calls the `nptl` ([Native POSIX Thread Library](https://en.wikipedia.org/wiki/Native_POSIX_Thread_Library))
+implementation of `_Fork`.
+
+From there, `arch_fork` is called, which, despite its name, is only implemented once for all Linux
+architectures. Then, one of the possible `clone`[^glibc-clone] {{ "variants" | generate_file_link: "glibc", "sysdeps/unix/sysv/linux/kernel-features.h", 129 }}
+is invoked with `INLINE_SYSCALL_CALL` according to the particular requirements of the architecture.
+For `x86-64` systems only `__ASSUME_CLONE_DEFAULT` is defined, so the last one will be executed.
+
+After the `INLINE_SYSCALL_CALL` macro is fully expanded, we arrive at `internal_syscall5`, which
+contains the [extended assembly](https://gcc.gnu.org/onlinedocs/gcc/Extended-Asm.html) required to
+perform a system call with 5 arguments. In this final piece of code, the syscall number and
+arguments are moved to the appropriate registers according to the {{ "x86-64 syscall convention" | generate_file_link: "glibc", "sysdeps/unix/sysv/linux/x86_64/sysdep.h", 158 }},
+and only then calls the `syscall` instruction, passing control to the kernel.
+
+{{ "fork_user" | generate_codepath }}
+
 ---
 
 [^article-code]:
@@ -146,3 +223,38 @@ this `fork` call lead us to?
     an overivew of its internals should definetely check out the chapter dedicated to bash in
     [The Architecture of Open Source Applications](https://aosabook.org/en/v1/bash.html), which is
     written by the main developer of bash, Chet Ramey.
+
+[^elf-versioning]:
+    Symbol versioning gives authors of shared objects the ability to label symbols with a given
+    version number. As far as I know, this is mostly used to detect binary incompatibilities and
+    prevent run-time errors when versions are mismatched.
+
+    Further reading:
+    - {{ "https://maskray.me/blog/2020-11-26-all-about-symbol-versioning" | generate_resource: "All about symbol versioning" }}
+    - {{ "https://akkadia.org/drepper/symbol-versioning" | generate_resource: "ELF Symbol Versioning" }}
+
+[^glibc-syscalls]:
+    In the [past](https://lwn.net/Articles/655028/) many system calls didn't have a corresponding
+    wrapper in `glibc`, so [syscall](https://www.man7.org/linux/man-pages/man2/syscall.2.html) had
+    to be used instead. I'm not sure how much has changed since, but things are likely better now.
+
+[^glibc-symbols]:
+    In addition to `fork`, we see that `__fork` is also defined as an alias for `__libc_fork` using
+    {{ "weak_alias" | generate_definition_link }}. However, `__fork` is later passed to
+    {{ "libc_hidden_def" | generate_definition_link }}, which defines an [internal symbol](https://stackoverflow.com/a/21422495)
+    to ensure that calls within `glibc` are routed to it, preventing symbol resolution overhead.
+    This is more or less {{ "documented" | generate_file_link: "glibc", "libc-symbols.h", 365 }}
+    in the header where these macros are defined. Still, it's not entirely clear to me why it has
+    the need to alias `__fork`, instead of simply hiding `__libc_fork`, since that's what's done for
+    other syscalls {{ "dup2" | generate_file_link: "glibc", "sysdeps/unix/sysv/linux/dup2.c", 39 }}.
+
+    Further reading:
+    - {{ "https://gcc.gnu.org/onlinedocs/gcc/Asm-Labels.html" | generate_resource: "Controlling Names Used in Assembler Code" }}
+    - {{ "https://gcc.gnu.org/wiki/Visibility" | generate_resource: "Visibility" }}
+    - {{ "https://maskray.me/blog/2021-06-20-symbol-processing" | generate_resource: "Symbol processing" }}
+    - {{ "https://maskray.me/blog/2021-04-25-weak-symbol" | generate_resource: "Weak symbol" }}
+
+[^glibc-clone]:
+    It may appear strange for `fork` wrapper to end up invoking the `clone` system call, but this
+    has been done since at least version [2.3.2](https://elixir.bootlin.com/glibc/glibc-2.3.2/source/nptl/sysdeps/unix/sysv/linux/i386/fork.c#L27)
+    in `i386`, probably because in the kernel `sys_fork` also ends up delegating to `sys_clone`.

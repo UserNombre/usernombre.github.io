@@ -1,6 +1,10 @@
 repositories:
   bash:
     format: "https://github.com/bminor/bash/blob/bash-5.2/${file}#L${line}"
+  glibc:
+    format: "https://elixir.bootlin.com/glibc/glibc-2.41/source/${file}#L${line}"
+  x86:
+    format: "https://www.felixcloutier.com/x86/${file}"
 
 definitions:
   # bash types
@@ -68,6 +72,63 @@ definitions:
     file: "y.tab.c"
     line: 1700
 
+  # glibc functions
+  __libc_fork:
+    repository: "glibc"
+    file: "posix/fork.c"
+    line: 40
+  __run_prefork_handlers:
+    repository: "glibc"
+    file: "posix/register-atfork.c"
+    line: 113
+  _Fork:
+    repository: "glibc"
+    file: "sysdeps/nptl/_Fork.c"
+    line: 25
+
+  weak_alias:
+    repository: "glibc"
+    file: "include/libc-symbols.h"
+    line: 153
+  libc_hidden_def:
+    repository: "glibc"
+    file: "include/libc-symbols.h"
+    line: 548
+  INLINE_SYSCALL:
+    repository: "glibc"
+    file: "sysdeps/unix/sysv/linux/sysdep.h"
+    line: 42
+  INTERNAL_SYSCALL:
+    repository: "glibc"
+    file: "sysdeps/unix/sysv/linux/x86_64/sysdep.h"
+    line: 234
+  internal_syscall5:
+    repository: "glibc"
+    file: "sysdeps/unix/sysv/linux/x86_64/sysdep.h"
+    line: 322
+  __INLINE_SYSCALL5:
+    repository: "glibc"
+    file: "sysdeps/unix/sysdep.h"
+    line: 93
+  __INLINE_SYSCALL_DISP:
+    repository: "glibc"
+    file: "sysdeps/unix/sysdep.h"
+    line: 103
+  INLINE_SYSCALL_CALL:
+    repository: "glibc"
+    file: "sysdeps/unix/sysdep.h"
+    line: 111
+  arch_fork:
+    repository: "glibc"
+    file: "sysdeps/unix/sysv/linux/arch-fork.h"
+    line: 35
+
+  # x86 instructions
+  syscall:
+    repository: "x86"
+    file: "syscall"
+    line: 0
+
 codepaths:
   bash_repl:
     - call: "bash_main"
@@ -124,3 +185,39 @@ codepaths:
                         - line: 2164
                           code: "fork"
                           highlight: true
+  fork_user:
+    - call: "__libc_fork"
+      comment: "Our fork is an alias to this symbol"
+      children:
+        - line: 51
+          call: "__run_prefork_handlers"
+          children:
+        - line: 75
+          call: "_Fork"
+          children:
+            - line: 33
+              call: "arch_fork"
+              children:
+                - line: 50
+                  call: "INLINE_SYSCALL_CALL"
+                  code: "ret = INLINE_SYSCALL_CALL (clone, flags, 0, NULL, ctid, 0)"
+                  highlight: true
+                  children:
+                    - line: 112
+                      call: "__INLINE_SYSCALL_DISP"
+                      children:
+                        - line: 104
+                          call: "__INLINE_SYSCALL5"
+                          children:
+                            - line: 95
+                              call: "INLINE_SYSCALL"
+                              children:
+                                - line: 44
+                                  call: "INTERNAL_SYSCALL"
+                                  children:
+                                    - line: 235
+                                      call: "internal_syscall5"
+                                      children:
+                                        - line: 336
+                                          call: "syscall"
+                                          highlight: true
