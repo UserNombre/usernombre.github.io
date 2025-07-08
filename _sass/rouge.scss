@@ -28,7 +28,10 @@
         user-select: none;
     }
     .go {
-        color: $color-gray-light;
+        color: $color-gray-lightest;
+    }
+    .ge {
+        color: $color-secondary-light;
     }
 }
 

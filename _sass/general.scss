@@ -24,6 +24,9 @@ article {
 
 p {
     line-height: 1.35em;
+    &:last-child, &:has(> a[role="doc-backlink"]) {
+        margin-top: 0em;
+    }
     &:first-child {
         margin-top: 0em;
     }
@@ -110,7 +113,7 @@ h1:target, h2:target {
 }
 
 ::selection {
-    background: $color-gray-lightest;
+    background: $color-gray-selection;
 }
 
 details h1::before {

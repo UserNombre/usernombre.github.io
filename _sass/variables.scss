@@ -1,8 +1,9 @@
 $gray-saturation: 10% !default;
-$color-gray-darkest: hsl($theme-hue, $gray-saturation, 5%);
-$color-gray-dark: hsl($theme-hue, $gray-saturation, 15%);
+$color-gray-selection: hsl($theme-hue, $gray-saturation, 50%);
+$color-gray-lightest: hsl($theme-hue, $gray-saturation, 40%);
 $color-gray-light: hsl($theme-hue, $gray-saturation, 30%);
-$color-gray-lightest: hsl($theme-hue, $gray-saturation, 50%);
+$color-gray-dark: hsl($theme-hue, $gray-saturation, 15%);
+$color-gray-darkest: hsl($theme-hue, $gray-saturation, 5%);
 $color-white: #fff;
 $color-black: #000;
 
