@@ -1,4 +1,5 @@
 Jekyll::Hooks.register :posts, :post_init do |post|
+  puts "[*] Checking post #{ post.relative_path } for modifications"
   ncommits = `git rev-list --count HEAD "#{ post.path }"`
 
   if ncommits.to_i > 1
