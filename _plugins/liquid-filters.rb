@@ -149,18 +149,20 @@ module Jekyll
         definition = self.definitions[node["call"]]
         html = definition.dig("symbol") || node["call"]
       end
-      classes = ["selectable"]
+      attributes = {:class => []}
+      attributes[:class] << ["selectable"]
       if node["highlight"].include?("foreground")
-        classes << "codepath-hl-fg"
+        attributes[:class] << "codepath-hl-fg"
       elsif node["highlight"].include?("background")
-        classes << "codepath-hl-bg"
+        attributes[:class] << "codepath-hl-bg"
       end
-      html = "<span class='#{classes.join(" ")}'>#{html}</span>"
       # FIXME: comment/footnotes style
       # https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Roles/tooltip_role#escape
       if node["comment"]
-        html = "<span title='#{node["comment"]}'>#{html}</span>"
+        attributes[:title] = node["comment"]
       end
+      attributes = attributes.map{|k,v| "#{k.to_s}='#{v.is_a?(Array) ? v.join(" ") : v}'"}
+      html = "<span #{attributes.join(" ")}>#{html}</span>"
       if node["footnote"]
         html += "<span markdown='1'>[^#{node["footnote"]}]</span>"
       end
