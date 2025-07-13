@@ -199,7 +199,58 @@ perform a system call with 5 arguments. In this final piece of code, the syscall
 arguments are moved to the appropriate registers according to the {{ "x86-64 syscall convention" | generate_file_link: "glibc", "sysdeps/unix/sysv/linux/x86_64/sysdep.h", 158 }},
 and only then calls the `syscall` instruction, passing control to the kernel.
 
-{{ "fork_user" | generate_codepath }}
+{{ "glibc_fork" | generate_codepath }}
+
+### Kernel space[^linux-utlk]
+
+At this point `syscall` invokes the handler found in the `IA32_LSTAR` model-specific register, which
+Linux configures to be `entry_SYSCALL_64`. There are many resources that already do a great job at
+explaining the internals of system calls in `x86`[^linux-syscalls], so I'll leave out details and
+simply outline relevant functions.
+
+{{ "linux_syscall" | generate_codepath }}
+
+Our journey continues in the `sys_clone` kernel function, which simply shoves arguments into a
+structure and passes it to `kernel_clone` (the common backend to most process/thread creation
+functions). Within it, `copy_process` handles the meat of the matter (see [UtLK 3.4](https://www.oreilly.com/library/view/understanding-the-linux/0596005652/ch03s04.html)
+for a detailed breakdown).
+
+Right at the start there's a bunch of error checking to ensure that [`clone_flags`](https://elixir.bootlin.com/linux/v6.1/source/include/uapi/linux/sched.h#L8)
+are consistent with each other. After that `dup_task_struct` creates a new process descriptor
+([UtLK 3.2](https://learning.oreilly.com/library/view/understanding-the-linux/0596005652/ch03s02.html)),
+copies data from its parent into it, allocates space for its kernel stack, and does some other minor
+adjustments to the descriptor. After that, `sched_fork` initializes scheduler information for the
+process and marks it as new, so that it won't be run while it's being set up.
+
+With the process descriptor ready, all of the major kernel structures that make up a process need to
+be configured. These are either cloned or shared by `copy_*` functions, according to the flags we
+mentioned previously (`arch_fork` only specifies
+`CLONE_CHILD_SETTID | CLONE_CHILD_CLEARTID | SIGCHLD`, so most will be
+duplicated). Out of all of these functions `copy_thread` is special, as it is the one in charge of
+setting up the execution context.
+
+The way Linux does this is by carefully crafting a stack which, when activated, will perform the
+steps expected of a new process returning from fork. The {{ "fork_frame" | generate_definition_link }}
+is the structure used to encode this information. It is composed of an {{ "inactive_task_frame" | generate_definition_link }},
+which stores kernel state for inactive processes (like a usual [stack frame](https://en.wikipedia.org/wiki/Call_stack#Structure)
+would), together with {{ "pt_regs" | generate_definition_link }}, which stores user state right
+after entering kernel mode (this is done at the start of `entry_SYSCALL_64`). A stack diagram would
+be quite useful to visualize what `copy_thread` does to the new process, but for now this will
+hopefully do:
+
+1. Fetch the stack address for `pt_regs` and deduce `fork_frame` and `inactive_task_frame` from it.
+2. Initialize `inactive_task_frame` by setting the frame pointer to the encoded version of `pt_regs`
+and the return address to `ret_from_fork_asm`.
+3. Make the stack pointer point to `fork_frame`, making it the active stack frame.
+4. Copy user registers over from the parent process and set `ax` to `0`, as that's what `fork` is
+expected to return on the child.
+
+{{ "linux_clone" | generate_codepath }}
+
+If everything has gone well, we now have a new process ready to be run. Back in `kernel_clone` it's
+marked as such by `wake_up_new_task`, and its identifier is returned so that it can be passed back
+to user space. The process will eventually be picked up by the scheduler and start execution,
+but for now we'll see how the parent goes back to user mode.
 
 ---
 
@@ -258,3 +309,36 @@ and only then calls the `syscall` instruction, passing control to the kernel.
     It may appear strange for `fork` wrapper to end up invoking the `clone` system call, but this
     has been done since at least version [2.3.2](https://elixir.bootlin.com/glibc/glibc-2.3.2/source/nptl/sysdeps/unix/sysv/linux/i386/fork.c#L27)
     in `i386`, probably because in the kernel `sys_fork` also ends up delegating to `sys_clone`.
+
+[^linux-syscalls]:
+    See:
+    - {{ "https://0xax.gitbooks.io/linux-insides/content/SysCall/linux-syscall-2.html" | generate_resource: "How does the Linux kernel handle a system call" }}
+    - {{ "https://juliensobczak.com/inspect/2021/08/10/linux-system-calls-under-the-hood/#kernel-mode-linux" | generate_resource: "Linux System Calls Under The Hood" }}
+    - {{ "https://lwn.net/Articles/604287/" | generate_resource: "Anatomy of a system call, part 1" }}
+    - {{ "https://lwn.net/Articles/604515/" | generate_resource: "Anatomy of a system call, part 2" }}
+
+[^linux-utlk]:
+    Everything that follows is my best attempt at explaining how the kernel creates a new process
+    and starts its execution. There will probably be some gaps in it, so I would recommend the
+    reader to grab a copy of [Understanding the Linux Kernel](https://www.oreilly.com/library/view/understanding-the-linux/0596005652/)
+    to expand on some of the topics.
+
+    It is the most comprehensive book on the subject, and although a bit outdated (the 3rd edition
+    was written for version 2.6), it's still very useful to understand the big picture, which has
+    not changed that much over the years.
+
+[^linux-vmap-stack]:
+    The actual definition of `alloc_thread_stack_node` depends on the {{ "VMAP_STACK" | generate_definition_link }}
+    configuration option, which on `x86-64` ends up enabled by default.
+
+    Further reading:
+    - {{ "https://lwn.net/Articles/692208/" | generate_resource: "Virtually mapped kernel stacks" }}
+    - {{ "https://www.kernel.org/doc/html/latest/mm/vmalloced-kernel-stacks.html" | generate_resource: "Virtually Mapped Kernel Stack Support" }}
+
+[^linux-namespaces]:
+    Since the introduction of PID namespaces in version [2.6.24](https://lwn.net/Articles/259217/)
+    the value returned is the virtual process identifier.
+
+    Further reading:
+    - {{ "https://lwn.net/Articles/531114/" | generate_resource: "Namespaces in operation, part 1: namespaces overview" }}
+    - {{ "https://blog.quarkslab.com/digging-into-linux-namespaces-part-1.html" | generate_resource: "Digging into Linux namespaces - part 1" }}

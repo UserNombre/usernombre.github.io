@@ -3,6 +3,8 @@ repositories:
     format: "https://github.com/bminor/bash/blob/bash-5.2/${file}#L${line}"
   glibc:
     format: "https://elixir.bootlin.com/glibc/glibc-2.41/source/${file}#L${line}"
+  linux:
+    format: "https://elixir.bootlin.com/linux/v6.12/source/${file}#L${line}"
   x86:
     format: "https://www.felixcloutier.com/x86/${file}"
 
@@ -123,6 +125,144 @@ definitions:
     file: "sysdeps/unix/sysv/linux/arch-fork.h"
     line: 35
 
+  # linux configurations
+  VMAP_STACK:
+    repository: "linux"
+    file: "arch/Kconfig"
+    line: 1383
+
+  # linux types
+  pt_regs:
+    repository: "linux"
+    file: "arch/x86/include/asm/ptrace.h"
+    line: 103
+  inactive_task_frame:
+    repository: "linux"
+    file: "arch/x86/include/asm/switch_to.h"
+    line: 23
+  fork_frame:
+    repository: "linux"
+    file: "arch/x86/include/asm/switch_to.h"
+    line: 44
+
+  # linux functions
+  container_of:
+    repository: "linux"
+    file: "include/linux/container_of.h"
+    line: 18
+  copy_io:
+    repository: "linux"
+    file: "include/linux/iocontext.h"
+    line: 122
+  current_pt_regs:
+    repository: "linux"
+    file: "include/linux/ptrace.h"
+    line: 389
+  copy_semundo:
+    repository: "linux"
+    file: "ipc/sem.c"
+    line: 2306
+  alloc_task_struct_node:
+    repository: "linux"
+    file: "kernel/fork.c"
+    line: 179
+  alloc_thread_stack_node:
+    repository: "linux"
+    file: "kernel/fork.c"
+    line: 278
+  dup_task_struct:
+    repository: "linux"
+    file: "kernel/fork.c"
+    line: 1101
+  copy_mm:
+    repository: "linux"
+    file: "kernel/fork.c"
+    line: 1697
+  copy_fs:
+    repository: "linux"
+    file: "kernel/fork.c"
+    line: 1735
+  copy_files:
+    repository: "linux"
+    file: "kernel/fork.c"
+    line: 1756
+  copy_sighand:
+    repository: "linux"
+    file: "kernel/fork.c"
+    line: 1786
+  copy_signal:
+    repository: "linux"
+    file: "kernel/fork.c"
+    line: 1835
+  copy_process:
+    repository: "linux"
+    file: "kernel/fork.c"
+    line: 2118
+  kernel_clone:
+    repository: "linux"
+    file: "kernel/fork.c"
+    line: 2745
+  sys_clone:
+    repository: "linux"
+    file: "kernel/fork.c"
+    line: 2913
+  copy_namespaces:
+    repository: "linux"
+    file: "kernel/nsproxy.c"
+    line: 151
+  get_task_pid:
+    repository: "linux"
+    file: "kernel/pid.c"
+    line: 451
+  pid_vnr:
+    repository: "linux"
+    file: "kernel/pid.c"
+    line: 499
+  __sched_fork:
+    repository: "linux"
+    file: "kernel/sched/core.c"
+    line: 4429
+  sched_fork:
+    repository: "linux"
+    file: "kernel/sched/core.c"
+    line: 4666
+  wake_up_new_task:
+    repository: "linux"
+    file: "kernel/sched/core.c"
+    line: 4804
+  encode_frame_pointer:
+    repository: "linux"
+    file: "arch/x86/include/asm/frame.h"
+    line: 67
+  task_pt_regs:
+    repository: "linux"
+    file: "arch/x86/include/asm/processor.h"
+    line: 637
+  do_syscall_x64:
+    repository: "linux"
+    file: "arch/x86/entry/common.c"
+    line: 42
+  do_syscall_64:
+    repository: "linux"
+    file: "arch/x86/entry/common.c"
+    line: 76
+  entry_SYSCALL_64:
+    repository: "linux"
+    file: "arch/x86/entry/entry_64.S"
+    line: 87
+  x64_sys_call:
+    repository: "linux"
+    file: "arch/x86/entry/syscall_64.c"
+    line: 30
+  arch_dup_task_struct:
+    repository: "linux"
+    file: "arch/x86/kernel/process.c"
+    line: 93
+  copy_thread:
+    repository: "linux"
+    file: "arch/x86/kernel/process.c"
+    line: 159
+
   # x86 instructions
   syscall:
     repository: "x86"
@@ -185,7 +325,7 @@ codepaths:
                         - line: 2164
                           code: "fork"
                           highlight: true
-  fork_user:
+  glibc_fork:
     - call: "__libc_fork"
       comment: "Our fork is an alias to this symbol"
       children:
@@ -221,3 +361,97 @@ codepaths:
                                         - line: 336
                                           call: "syscall"
                                           highlight: true
+  linux_syscall:
+    - call: "entry_SYSCALL_64"
+      children:
+        - line: 121
+          call: "do_syscall_64"
+          children:
+            - line: 83
+              call: "do_syscall_x64"
+              children:
+                - line: 83
+                  call: "x64_sys_call"
+                  children:
+                    - call: "sys_clone"
+                      highlight: true
+  linux_clone:
+    - call: "sys_clone"
+      comment: "Actually wraps __do_sys_clone, but oh well"
+      children:
+        - line: 2929
+          call: "kernel_clone"
+          children:
+            - line: 2786
+              call: "copy_process"
+              children:
+                - line: 2204
+                  call: "dup_task_struct"
+                  children:
+                    - line: 1108
+                      call: "alloc_task_struct_node"
+                    - line: 1112
+                      call: "arch_dup_task_struct"
+                    - line: 1116
+                      call: "alloc_thread_stack_node"
+                      footnote: "linux-vmap-stack"
+                - line: 2344
+                  call: "sched_fork"
+                  children:
+                    - line: 4674
+                      call: "__sched_fork"
+                    - line: 4674
+                      code: "p->__state = TASK_NEW"
+                      highlight: true
+                - line: 2359
+                  call: "copy_semundo"
+                - line: 2362
+                  call: "copy_files"
+                - line: 2365
+                  call: "copy_fs"
+                - line: 2368
+                  call: "copy_sighand"
+                - line: 2371
+                  call: "copy_signal"
+                - line: 2374
+                  call: "copy_mm"
+                - line: 2377
+                  call: "copy_namespaces"
+                - line: 2380
+                  call: "copy_io"
+                - line: 2383
+                  call: "copy_thread"
+                  highlight: true
+                  children:
+                    - line: 170
+                      call: "task_pt_regs"
+                      code: "childregs = task_pt_regs(p)"
+                    - code: "fork_frame = container_of(childregs, struct fork_frame, regs)"
+                      call: "container_of"
+                    - code: "frame = &fork_frame->frame"
+                    - code: "frame->bp = encode_frame_pointer(childregs)"
+                      call: "encode_frame_pointer"
+                      highlight: "background"
+                    - code: "frame->ret_addr = ret_from_fork_asm"
+                      highlight: "background"
+                    - code: "p->thread.sp = fork_frame"
+                      highlight: "background"
+                    - line: 231
+                      code: "*childregs = *current_pt_regs()"
+                      call: "current_pt_regs"
+                    - code: "childregs->ax = 0"
+                      highlight: "background"
+            - line: 2702
+              call: "wake_up_new_task"
+              children:
+                - line: 4811
+                  code: "WRITE_ONCE(p->__state, TASK_RUNNING)"
+                  highlight: true
+            - line: 2683
+              call: "get_task_pid"
+              code: "pid = get_task_pid(p, PIDTYPE_PID)"
+            - call: "pid_vnr"
+              code: "nr = pid_vnr(pid)"
+              footnote: "linux-namespaces"
+            - line: 2714
+              code: "return nr"
