@@ -21,10 +21,10 @@ that attempt to thread all of it into one cohesive narrative, kind of like a wal
 
 With this in mind, I've set out to (hopefully) create a series of articles that will deal with the
 execution of a program, starting with the shell invoking it up until the execution of its first line
-of code. In this article, we'll only explore the creation of a new process, and I intend for later
-ones to deal with the execution of a new program and dynamic loading, among other things.
-Additionally, for some tangential topics that are not covered here, I'll link to useful resources
-I've come across, which should provide a starting point for deeper exploration.
+of code. In this article, we'll only explore the creation of a new process[^article-process], and I
+intend for later ones to deal with the execution of a new program and dynamic loading, among other
+things. Additionally, for some tangential topics that are not covered here, I'll link to useful
+resources I've come across, which should provide a starting point for deeper exploration.
 
 This article is written with `x86-64` systems in mind, as it is what I am most familiar with. Wherever
 code is referenced, links to the source are provided to improve browsability[^article-code].
@@ -252,7 +252,170 @@ marked as such by `wake_up_new_task`, and its identifier is returned so that it 
 to user space. The process will eventually be picked up by the scheduler and start execution,
 but for now we'll see how the parent goes back to user mode.
 
+## Back to user space
+
+### Parent return
+
+Right before returning, `do_syscall_64` performs some checks to decide whether it should use
+`sysret` or `iret` to reenter user mode, and since all succeed `sysret` is used. Back in
+`entry_SYSCALL_64` the appropriate branch is taken, where setup work done at the start is reverted
+and finally `sysretq` is executed, effectively handing execution back to user code right after the
+initial `syscall` instruction (for details see [^linux-syscalls]).
+
+{{ "kernel_parent_return" | generate_codepath }}
+
+Before returning to the shell, `__libc_fork` calls `__run_postfork_handlers`, the counterpart to
+`__run_prefork_handlers`, indicating to run only those intended for the parent. After returning,
+`make_child` restores signals, updates job control information, and stores the pid for the new
+process. Finally, after returning from `execute_simple_command`, `wait_for` blocks the shell until
+the newly created process terminates[^linux-signals].
+
+{{ "user_parent_return" | generate_codepath }}
+
+As we can see, once the parent is done creating its child, it does little more than wait until it
+dies (a fairly weird parenting paradigm in my opinion). With that out of the way, we get into the
+interesting part: how does the kernel go from executing one process to another?
+
+### Scheduling
+
+The [scheduler](https://en.wikipedia.org/wiki/Scheduling_(computing)) is the component of an
+operating system that decides when and until when a process should run. This task is both complex
+and open-ended, which is the reason why historically many algorithms have been developed for Linux,
+and even today different {{ "scheduling policies" | generate_file_link: "linux", "include/uapi/linux/sched.h", 112 }}
+may be desirable depending on the workload of the system. Scheduling algorithms are somewhat besides
+the point, but this makes a great opportunity to peer into some fundamental scheduling principles
+and their implementation in Linux[^linux-scheduling].
+
+As {{ "documented" | generate_file_link: "linux", "kernel/sched/core.c", 6510 }} in the `__schedule`
+function, there are various means of driving the scheduler, but these can roughly be split into two
+groups: those that result from a process yielding execution, and those that don't. In the following
+sections we'll look into one example from each of them to get a feel for how the scheduler operates.
+
+#### Yielding
+
+One possible scenario involving a process relinquishing execution would be the `waitpid` call we saw
+the parent do after it was done forking. Without going into too much detail, we can see that
+`__waitpid` is a simple wrapper around `__wait4`. We enter the kernel through `sys_wait4`, and
+eventually arrive at `do_wait`. There we initialize a wait queue entry and add it to the child exit
+queue, after which we enter a loop that sets the task state to `TASK_INTERRUPTIBLE`, calls
+`__do_wait` to check if we can stop waiting, and if we can't (`-ERESTARTSYS` returned), then
+`schedule` is called to yield execution.
+
+{{ "waitpid_schedule" | generate_codepath }}
+
+#### Non-yielding
+
+All non-yielding (or preemptive) scenarios involve the {{ "TIF_NEED_RESCHED" | generate_definition_link }}
+flag being set, mainly after a process' [time slice](https://en.wikipedia.org/wiki/Preemption_(computing)#Time_slice)
+runs out. The exact mechanism for this will vary from system to system, but it will always be a
+timer interrupt of some kind, such as a local [APIC](https://wiki.osdev.org/APIC_timer), which is
+registered in the clock event framework by {{ "setup_APIC_timer" | generate_definition_link }}
+[^linux-timers].
+
+Once the APIC fires an interrupt request, `sysvec_apic_timer_interrupt` is invoked to handle it,
+and `local_apic_timer_interrupt` dispatches the event to appropriate handler, which in our case will
+be `tick_handle_periodic`. Skip some functions ahead and we reach `sched_tick`, the function in
+charge of updating scheduler information. Among other things, it invokes the tick function for the
+active scheduler class, which for most desktop systems will be `task_tick_fair`. Finally, we reach
+`update_curr`, which updates the task's runtime statistics, and if it has consumed its time slice,
+reschedules it by calling `resched_curr`, which ends up setting the `TIF_NEED_RESCHED` flag.
+
+{{ "apic_reschedule" | generate_codepath }}
+
+After all this, however, `schedule` has not yet been called. Instead, it will be called on the next
+possible occassion, which usually means on returns to user space. If we take the syscall code that
+we saw above, we will see that after `do_syscall_64` is finished with its work, it calls
+`syscall_exit_to_user_mode`. A few functions in, we reach `exit_to_user_mode_loop`, which performs
+som final tasks before leaving kernel space, including a call to `schedule` when `TIF_NEED_RESCHED`
+is set.
+
+{{ "syscall_schedule" | generate_codepath }}
+
+#### Context switch
+
+Now that the decision to schedule a new process has been made, there are three main tasks left to
+do: decide which process will be executed, save the current execution context to the old process,
+and then load it from the new one. The first one depends on the scheduler class of the process, but
+it isn't that relevant, as we'll assume that our child process is picked. The second and third are
+typically bundled together into what's known as a [context switch](https://wiki.osdev.org/Context_Switching)[^linux-context-switch],
+and it consists mostly of architecture specific code.
+
+After calling `schedule` we get to `__schedule_loop`, which calls `__schedule` in a loop while the
+process requires rescheduling. It is `__schedule` that handles the three points mentioned above by
+calling `pick_next_task` and `context_switch`. The implementation of `pick_next_task` has grown
+quite complex since the introduction of [core scheduling](https://www.kernel.org/doc/html/latest/admin-guide/hw-vuln/core-scheduling.html),
+but if we assume the simplest case, only `__pick_next_task` is called, which then dispatches it to
+the `pick_next_task_fair` function.
+
+{{ "linux_schedule" | generate_codepath }}
+
+The first thing `context_switch` does is call `prepare_task_switch`, which takes care of updating
+scheduling statistics and other varied tasks. This is follwed by `switch_mm_irqs_off`, tasked with
+swapping the active address space to that of our new process, as well as some other memory and
+synchronization shenanigans. Some lines ahead we reach a turning point in execution: `switch_to`.
+
+Alright, technically `switch_to` is a simple wrapper around `__switch_to_asm`, but the latter **is**
+where the process switch actually happens. Understanding how this function works is essential in
+order to make sense of the preparation that was made earlier within `copy_thread` and vice versa.
+Here is how the switch takes place:
+
+1. Push callee-saved registers (`%rbp`, `%rbx` and `%r12` through `%r16`) to the stack in order to
+preserve their values, as specified by the [System V ABI for x86-64](https://wiki.osdev.org/System_V_ABI#x86-64).
+Adding this to the usual stack frame, we get an {{ "inactive_task_frame" | generate_definition_link }}
+at the top of the stack.
+2. Save the value of the stack pointer (`%rsp`) within the previous task (`%rdi`)[^linux-asm-offsets].
+This completes the saving of the execution context, allowing for a later restore.
+3. Load the value of the stack pointer from the next task (`%rsi`). Conceptually, this completes the
+switch, as instructions past this point will reference the stack of the new task, and therefore use
+its execution context.
+4. Pop callee-saved register from the stack, effectively restoring the values they had the last time
+the task was executed (or those set in `copy_thread` for a new task). What is left at the top of the
+stack is a bare stack frame.
+5. Jump to `__switch_to` in order to finish up some details.
+
+It may appear strange at first that the instruction pointer (`%rip`) isn't saved together with the
+other registers, but there's really no need, since next time the saved process gets switched it will
+necessarily continue execution on step 4. From a process' point of view, `__switch_to_asm` is split
+into two parts: the first one (1-3), which runs when it process hands off execution, and the second
+one (4-5), which runs when it regains execution.
+
+{{ "linux_context_switch" | generate_codepath }}
+
+After jumping into `__switch_to` some final, mostly x86 specific, adjustments are made: [segments](https://en.wikipedia.org/wiki/X86_memory_segmentation#Later_developments)
+are saved an loaded, [TLS](https://en.wikipedia.org/wiki/Thread-local_storage) pages are set up and
+some [per-cpu](https://0xax.gitbooks.io/linux-insides/content/Concepts/linux-cpu-1.html) variables
+are updated, along with some less interesting ones. What interests us however, is the inconspicuous
+`return` at the end of the function. An existing process returning from `__switch_to` would wind up
+back in `context_switch`, then `__schedule`, and eventually continue whatever it was doing before it
+was switched. On the other hand, our process can't continue where it left off, since it never
+executed in the first place. Instead, `copy_thread` initialized this first stack frame so that a
+newly created process returns into `ret_from_fork_asm`.
+
+### Child return
+
+Unlike normal processes, which typically enter the kernel through system calls or interrupts, new
+processes have never been in user space, so `ret_from_fork_asm` is in charge of getting them there
+for the first time. It first calls `ret_from_fork`, which among other functions ends up calling
+`finish_task_switch` (paired with the previous `prepare_task_switch`), which cleans up what's left
+of the task switch (mainly memory and timing details) and `syscall_exit_to_user_mode` to handle
+pending work before entering user mode. After that, `swapgs_restore_regs_and_return_to_usermode`,
+which has a very self-descriptive name, restores user register from `pt_regs`, executes [`swapgs`](https://wiki.osdev.org/SWAPGS),
+and finally enters user mode via `iretq`.
+
+{{ "kernel_child_return" | generate_codepath }}
+
+Back in user space everything is almost the same, except for a little twist: `fork` now returns 0,
+indicating a child process. This time, before returning from `execute_disk_command`, `shell_execve`
+is entered. From there, `execve` is called, and at this point our new process will become an
+entirely different one.
+
+{{ "user_child_return" | generate_codepath }}
+
 ---
+
+[^article-process]:
+    Throughout the article I will use the words "process" and "task" more or less indistinctly to
+    refer to both the schedulable unit as well as the `task_struct` that represents it.
 
 [^article-code]:
     Linux and glibc links point to the [Elixir](https://github.com/bootlin/elixir) cross-referencer
@@ -314,6 +477,7 @@ but for now we'll see how the parent goes back to user mode.
     See:
     - {{ "https://0xax.gitbooks.io/linux-insides/content/SysCall/linux-syscall-2.html" | generate_resource: "How does the Linux kernel handle a system call" }}
     - {{ "https://juliensobczak.com/inspect/2021/08/10/linux-system-calls-under-the-hood/#kernel-mode-linux" | generate_resource: "Linux System Calls Under The Hood" }}
+    - {{ "https://blog.slowerzs.net/posts/linux-kernel-syscalls/" | generate_resource: "Linux Kernel - Syscalls" }}
     - {{ "https://lwn.net/Articles/604287/" | generate_resource: "Anatomy of a system call, part 1" }}
     - {{ "https://lwn.net/Articles/604515/" | generate_resource: "Anatomy of a system call, part 2" }}
 
@@ -342,3 +506,40 @@ but for now we'll see how the parent goes back to user mode.
     Further reading:
     - {{ "https://lwn.net/Articles/531114/" | generate_resource: "Namespaces in operation, part 1: namespaces overview" }}
     - {{ "https://blog.quarkslab.com/digging-into-linux-namespaces-part-1.html" | generate_resource: "Digging into Linux namespaces - part 1" }}
+
+[^linux-signals]:
+    Of course we can still interact with the shell through signals, but that's a story for some other time.
+
+[^linux-scheduling]:
+    A good overview, even if somewhat dated, of Linux's core scheduling principles, algorithms, as
+    well as implementation details can be found on [UtLK 7](https://www.oreilly.com/library/view/understanding-the-linux/0596005652/ch07.html).
+
+    Further reading:
+    - {{ "https://lwn.net/Articles/87729/" | generate_resource: "The staircase scheduler" }}
+    - {{ "https://lwn.net/Articles/224865/" | generate_resource: "The Rotating Staircase Deadline Scheduler" }}
+    - {{ "https://lwn.net/Articles/230574/" | generate_resource: "Schedulers: the plot thickens" }}
+    - {{ "https://lwn.net/Articles/922405/" | generate_resource: "The extensible scheduler class" }}
+    - {{ "https://lwn.net/Articles/925371/" | generate_resource: "An EEVDF CPU scheduler for Linux" }}
+
+[^linux-timers]:
+    The timer subsystem is quite complex, and since different systems can have different timing
+    devices and configurations I'm not sure if there is a general case. For this reason, we assume
+    that periodic interrupts are handled by the local APIC in each CPU.
+
+    Further reading:
+    - {{ "https://wiki.osdev.org/Timer_Interrupt_Sources" | generate_resource: "Timer Interrupt Sources" }}
+    - {{ "https://0xax.gitbooks.io/linux-insides/content/Timers/linux-timers-5.html" | generate_resource: "Introduction to the clockevents framework" }}
+    - {{ "https://www.linuxfoundation.org/webinars/the-ticking-beast-a-deep-dive-into-timers-timekeeping-tick-and-tickless-kernels" | generate_resource: "The Ticking Beast" }}
+
+[^linux-context-switch]:
+    A description of the context switch can be found on [UtLK 3.3](https://www.oreilly.com/library/view/understanding-the-linux/0596005652/ch03s03.html),
+    but because it was written for version 2.6 and contains i386 specific code, much has changed
+    since. Instead, I recommend reading the [Evolution of the x86 context switch in Linux](https://www.maizure.org/projects/evolution_x86_context_switch_linux/),
+    which explores the context switch across different kernel versions, including a more recent one
+    (4.16).
+
+[^linux-asm-offsets]:
+    The previous task is referenced by `%rdi`, and {{ "TASK_threadsp" | generate_definition_link }}
+    is a constant containing the offset of the `thread.sp` field within `task_struct`. These
+    constants are generated quite early in the {{ "top-level Kbuild" | generate_file_link: "linux", "Kbuild", "26" }}
+    and are mostly used in assembly code, which doesn't have access to C structures.

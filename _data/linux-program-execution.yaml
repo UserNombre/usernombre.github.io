@@ -44,6 +44,10 @@ definitions:
     repository: "bash"
     file: "execute_cmd.c"
     line: 5586
+  shell_execve:
+    repository: "bash"
+    file: "execute_cmd.c"
+    line: 5948
   search_for_command:
     repository: "bash"
     file: "findcmd.c"
@@ -52,6 +56,14 @@ definitions:
     repository: "bash"
     file: "jobs.c"
     line: 2121
+  wait_for:
+    repository: "bash"
+    file: "jobs.c"
+    line: 2899
+  waitchld:
+    repository: "bash"
+    file: "jobs.c"
+    line: 3764
   make_bare_simple_command:
     repository: "bash"
     file: "make_cmd.c"
@@ -83,11 +95,26 @@ definitions:
     repository: "glibc"
     file: "posix/register-atfork.c"
     line: 113
+  __run_postfork_handlers:
+    repository: "glibc"
+    file: "posix/register-atfork.c"
+    line: 167
+  __waitpid:
+    repository: "glibc"
+    file: "posix/waitpid.c"
+    line: 36
   _Fork:
     repository: "glibc"
     file: "sysdeps/nptl/_Fork.c"
     line: 25
-
+  __wait4_time64:
+    repository: "glibc"
+    file: "sysdeps/unix/sysv/linux/wait4.c"
+    line: 26
+  __wait4:
+    repository: "glibc"
+    file: "sysdeps/unix/sysv/linux/wait4.c"
+    line: 115
   weak_alias:
     repository: "glibc"
     file: "include/libc-symbols.h"
@@ -131,6 +158,16 @@ definitions:
     file: "arch/Kconfig"
     line: 1383
 
+  # linux constants
+  TASK_threadsp:
+    repository: "linux"
+    file: "arch/x86/kernel/asm-offsets.c"
+    line: 37
+  TIF_NEED_RESCHED:
+    repository: "linux"
+    file: "arch/x86/include/asm/thread_info.h"
+    line: 89
+
   # linux types
   pt_regs:
     repository: "linux"
@@ -150,18 +187,66 @@ definitions:
     repository: "linux"
     file: "include/linux/container_of.h"
     line: 18
+  exit_to_user_mode_prepare:
+    repository: "linux"
+    file: "include/linux/entry-common.h"
+    line: 317
   copy_io:
     repository: "linux"
     file: "include/linux/iocontext.h"
     line: 122
+  local_irq_disable:
+    repository: "linux"
+    file: "include/linux/irqflags.h"
+    line: 200
+  raw_cpu_write:
+    repository: "linux"
+    file: "include/linux/percpu-defs.h"
+    line: 409
   current_pt_regs:
     repository: "linux"
     file: "include/linux/ptrace.h"
     line: 389
+  set_current_state:
+    repository: "linux"
+    file: "include/linux/sched.h"
+    line: 232
+  set_tsk_thread_flag:
+    repository: "linux"
+    file: "include/linux/sched.h"
+    line: 1967
+  clear_tsk_thread_flag:
+    repository: "linux"
+    file: "include/linux/sched.h"
+    line: 1972
+  set_tsk_need_resched:
+    repository: "linux"
+    file: "include/linux/sched.h"
+    line: 1998
+  clear_tsk_need_resched:
+    repository: "linux"
+    file: "include/linux/sched.h"
+    line: 2003
   copy_semundo:
     repository: "linux"
     file: "ipc/sem.c"
     line: 2306
+  __do_wait:
+    repository: "linux"
+    file: "kernel/exit.c"
+    line: 1633
+  do_wait:
+    repository: "linux"
+    file: "kernel/exit.c"
+    line: 1680
+  kernel_wait4:
+    repository: "linux"
+    file: "kernel/exit.c"
+    line: 1816
+  sys_wait4:
+    repository: "linux"
+    file: "kernel/exit.c"
+    line: 1875
   alloc_task_struct_node:
     repository: "linux"
     file: "kernel/fork.c"
@@ -218,6 +303,22 @@ definitions:
     repository: "linux"
     file: "kernel/pid.c"
     line: 499
+  exit_to_user_mode_loop:
+    repository: "linux"
+    file: "kernel/entry/common.c"
+    line: 90
+  __syscall_exit_to_user_mode_work:
+    repository: "linux"
+    file: "kernel/entry/common.c"
+    line: 203
+  syscall_exit_to_user_mode:
+    repository: "linux"
+    file: "kernel/entry/common.c"
+    line: 215
+  resched_curr:
+    repository: "linux"
+    file: "kernel/sched/core.c"
+    line: 1079
   __sched_fork:
     repository: "linux"
     file: "kernel/sched/core.c"
@@ -230,6 +331,90 @@ definitions:
     repository: "linux"
     file: "kernel/sched/core.c"
     line: 4804
+  prepare_task_switch:
+    repository: "linux"
+    file: "kernel/sched/core.c"
+    line: 5127
+  finish_task_switch:
+    repository: "linux"
+    file: "kernel/sched/core.c"
+    line: 5159
+  schedule_tail:
+    repository: "linux"
+    file: "kernel/sched/core.c"
+    line: 5247
+  context_switch:
+    repository: "linux"
+    file: "kernel/sched/core.c"
+    line: 5272
+  sched_tick:
+    repository: "linux"
+    file: "kernel/sched/core.c"
+    line: 5584
+  __pick_next_task:
+    repository: "linux"
+    file: "kernel/sched/core.c"
+    line: 5952
+  pick_next_task:
+    repository: "linux"
+    file: "kernel/sched/core.c"
+    line: 6044
+  __schedule:
+    repository: "linux"
+    file: "kernel/sched/core.c"
+    line: 6548
+  __schedule_loop:
+    repository: "linux"
+    file: "kernel/sched/core.c"
+    line: 6766
+  schedule:
+    repository: "linux"
+    file: "kernel/sched/core.c"
+    line: 6775
+  update_deadline:
+    repository: "linux"
+    file: "kernel/sched/fair.c"
+    line: 1007
+  update_curr:
+    repository: "linux"
+    file: "kernel/sched/fair.c"
+    line: 1216
+  entity_tick:
+    repository: "linux"
+    file: "kernel/sched/fair.c"
+    line: 5662
+  pick_next_task_fair:
+    repository: "linux"
+    file: "kernel/sched/fair.c"
+    line: 8879
+  task_tick_fair:
+    repository: "linux"
+    file: "kernel/sched/fair.c"
+    line: 13049
+  rq_lock:
+    repository: "linux"
+    file: "kernel/sched/sched.h"
+    line: 1802
+  add_wait_queue:
+    repository: "linux"
+    file: "kernel/sched/wait.c"
+    line: 17
+  tick_periodic:
+    repository: "linux"
+    file: "kernel/time/tick-common.c"
+    line: 86
+  tick_handle_periodic:
+    repository: "linux"
+    file: "kernel/time/tick-common.c"
+    line: 108
+  update_process_times:
+    repository: "linux"
+    file: "kernel/time/timer.c"
+    line: 2512
+  load_TLS:
+    repository: "linux"
+    file: "arch/x86/include/asm/desc.h"
+    line: 120
   encode_frame_pointer:
     repository: "linux"
     file: "arch/x86/include/asm/frame.h"
@@ -238,6 +423,10 @@ definitions:
     repository: "linux"
     file: "arch/x86/include/asm/processor.h"
     line: 637
+  POP_REGS:
+    repository: "linux"
+    file: "arch/x86/entry/calling.h"
+    line: 130
   do_syscall_x64:
     repository: "linux"
     file: "arch/x86/entry/common.c"
@@ -250,23 +439,83 @@ definitions:
     repository: "linux"
     file: "arch/x86/entry/entry_64.S"
     line: 87
+  __switch_to_asm:
+    repository: "linux"
+    file: "arch/x86/entry/entry_64.S"
+    line: 177
+  ret_from_fork_asm:
+    repository: "linux"
+    file: "arch/x86/entry/entry_64.S"
+    line: 227
+  swapgs_restore_regs_and_return_to_usermode:
+    repository: "linux"
+    file: "arch/x86/entry/entry_64.S"
+    line: 560
   x64_sys_call:
     repository: "linux"
     file: "arch/x86/entry/syscall_64.c"
     line: 30
+  switch_to:
+    repository: "linux"
+    file: "arch/x86/include/asm/switch_to.h"
+    line: 49
+  setup_APIC_timer:
+    repository: "linux"
+    file: "arch/x86/kernel/apic/apic.c"
+    line: 571
+  local_apic_timer_interrupt:
+    repository: "linux"
+    file: "arch/x86/kernel/apic/apic.c"
+    line: 1010
+  sysvec_apic_timer_interrupt:
+    repository: "linux"
+    file: "arch/x86/kernel/apic/apic.c"
+    line: 1049
   arch_dup_task_struct:
     repository: "linux"
     file: "arch/x86/kernel/process.c"
     line: 93
+  ret_from_fork:
+    repository: "linux"
+    file: "arch/x86/kernel/process.c"
+    line: 140
   copy_thread:
     repository: "linux"
     file: "arch/x86/kernel/process.c"
     line: 159
+  save_fsgs:
+    repository: "linux"
+    file: "arch/x86/kernel/process_64.c"
+    line: 274
+  x86_fsgsbase_load:
+    repository: "linux"
+    file: "arch/x86/kernel/process_64.c"
+    line: 391
+  __switch_to:
+    repository: "linux"
+    file: "arch/x86/kernel/process_64.c"
+    line: 610
+  switch_mm_irqs_off:
+    repository: "linux"
+    file: "arch/x86/mm/tlb.c"
+    line: 498
 
   # x86 instructions
+  iretq:
+    repository: "x86"
+    file: "iret:iretd:iretq"
+    line: 0
   syscall:
     repository: "x86"
     file: "syscall"
+    line: 0
+  sysret:
+    repository: "x86"
+    file: "sysret"
+    line: 0
+  swapgs:
+    repository: "x86"
+    file: "swapgs"
     line: 0
 
 codepaths:
@@ -369,6 +618,8 @@ codepaths:
           children:
             - line: 83
               call: "do_syscall_x64"
+              code: "regs->ax = x64_sys_call(regs, unr)"
+              highlight: true
               children:
                 - line: 83
                   call: "x64_sys_call"
@@ -455,3 +706,299 @@ codepaths:
               footnote: "linux-namespaces"
             - line: 2714
               code: "return nr"
+  kernel_parent_return:
+    - call: "entry_SYSCALL_64"
+      children:
+        - line: 121
+          call: "do_syscall_64"
+          comment: "Set EAX to specify return mode"
+        - line: 166
+          call: "sysret"
+          code: "sysretq"
+          highlight: true
+  user_parent_return:
+    - call: "execute_command_internal"
+      children:
+        - line: 866
+          call: "execute_simple_command"
+          children:
+            - line: 4811
+              call: "execute_disk_command"
+              children:
+                - line: 5652
+                  call: "make_child"
+                  children:
+                    - line: 2164
+                      call: "__libc_fork"
+                      code: "pid = fork()"
+                      highlight: true
+                      children:
+                        - line: 132
+                          call: "__run_postfork_handlers"
+                    - line: 
+                      code: "last_made_pid = pid"
+        - line: 911
+          call: "wait_for"
+          code: "wait_for(last_made_pid, 0)"
+          children:
+            - line: 2980
+              call: "waitchld"
+              children:
+                - line: 3800
+                  call: "__waitpid"
+                  code: "waitpid"
+                  comment: "The actual call is made by the WAITPID macro"
+                  highlight: true
+  waitpid_schedule:
+    - call: "__waitpid"
+      comment: "waitpid is alised to this symbol"
+      children:
+        - line: 38
+          call: "__wait4"
+          children:
+            - line: 120
+              call: "__wait4_time64"
+              children:
+                - line: 30
+                  call: "syscall"
+                  comment: "Omitted SYCALL_CANCEL macro expansion and kernel entry"
+                  children:
+                    - call: "sys_wait4"
+                      children:
+                        - line: 1879
+                          call: "kernel_wait4"
+                          children:
+                            - line: 1851
+                              call: "do_wait"
+                              children:
+                                - line: 1688
+                                  call: "add_wait_queue"
+                                  code: "add_wait_queue(&current->signal->wait_chldexit, &wo->child_wait)"
+                                - line: 1691
+                                  code: "set_current_state(TASK_INTERRUPTIBLE)"
+                                  call: "set_current_state"
+                                  highlight: true
+                                - line: 1692
+                                  call: "__do_wait"
+                                - line: 1697
+                                  call: "schedule"
+                                  highlight: true
+  apic_reschedule:
+    - call: "sysvec_apic_timer_interrupt"
+      children:
+        - line: 1055
+          call: "local_apic_timer_interrupt"
+          children:
+            - line: 1038
+              call: "tick_handle_periodic"
+              code: "evt->event_handler(evt)"
+              highlight: true
+              children:
+                - line: 113
+                  call: "tick_periodic"
+                  children:
+                    - line: 101
+                      call: "update_process_times"
+                      children:
+                        - line: 2524
+                          call: "sched_tick"
+                          children:
+                            - line: 5606
+                              call: "task_tick_fair"
+                              code: "curr->sched_class->task_tick(rq, curr, 0)"
+                              highlight: true
+                              children:
+                                - line: 13056
+                                  call: "entity_tick"
+                                  children:
+                                    - line: 5667
+                                      call: "update_curr"
+                                      children:
+                                        - line: 1231
+                                          call: "update_deadline"
+                                          code: "resched = update_deadline(cfs_rq, curr)"
+                                          highlight: true
+                                        - line: 1254
+                                          call: "resched_curr"
+                                          comment: "Assume cpu == smp_processor_id()"
+                                          children:
+                                            - line: 1092
+                                              call: "set_tsk_need_resched"
+                                              children:
+                                                - line: 2000
+                                                  call: "set_tsk_thread_flag"
+                                                  code: "set_tsk_thread_flag(tsk,TIF_NEED_RESCHED)"
+                                                  highlight: true
+  syscall_schedule:
+    - call: "entry_SYSCALL_64"
+      children:
+        - line: 121
+          call: "do_syscall_64"
+          children:
+            - line: 89
+              call: "syscall_exit_to_user_mode"
+              children:
+                - line: 218
+                  call: "__syscall_exit_to_user_mode_work"
+                  children:
+                    - line: 207
+                      call: "exit_to_user_mode_prepare"
+                      children:
+                        - line: 328
+                          call: "exit_to_user_mode_loop"
+                          children:
+                            - line: 102
+                              call: "schedule"
+                              highlight: true
+  linux_schedule:
+    - call: "schedule"
+      children:
+        - line: 6785
+          call: "__schedule_loop"
+          code: "__schedule_loop(SM_NONE)"
+          children:
+            - line: 6770
+              call: "__schedule"
+              children:
+                - line: 6564
+                  code: "rq = cpu_rq(cpu)"
+                - code: "prev = rq->curr"
+                - line: 6572
+                  call: "local_irq_disable"
+                - line: 6592
+                  call: "rq_lock"
+                - line: 6647
+                  call: "pick_next_task"
+                  code: "next = pick_next_task(rq, prev, &rf)"
+                  comment: "Assume !sched_core_enabled(rq)"
+                  highlight: true
+                  children:
+                    - line: 6056
+                      call: "__pick_next_task"
+                      comment: "Assume !sched_class_above(prev->sched_class, &fair_sched_class) && rq->nr_running == rq->cfs.h_nr_running"
+                      children:
+                        - line: 5971
+                          call: "pick_next_task_fair"
+                - line: 6648
+                  call: "clear_tsk_need_resched"
+                  code: "clear_tsk_need_resched(prev)"
+                  children:
+                    - line: 1974
+                      call: "clear_tsk_thread_flag"
+                      code: "clear_tsk_thread_flag(tsk,TIF_NEED_RESCHED)"
+                - line: 6693
+                  call: "context_switch"
+                  code: "rq = context_switch(rq, prev, next, &rf)"
+                  highlight: true
+  linux_context_switch:
+    - call: "context_switch"
+      children:
+        - line: 5275
+          call: "prepare_task_switch"
+          code: "prepare_task_switch(rq, prev, next)"
+          highlight: true
+        - line: 5312
+          call: "switch_mm_irqs_off"
+          code: "switch_mm_irqs_off(prev->active_mm, next->mm, next)"
+        - line: 5328
+          call: "switch_to"
+          code: "switch_to(prev, next, prev)"
+          children:
+            - line: 51
+              call: "__switch_to_asm"
+              code: "last = __switch_to_asm(prev, next)"
+              highlight: true
+              children:
+                - line: 182
+                  code: "pushq %rbp"
+                - code: "pushq %rbx"
+                - code: "pushq %r12"
+                - code: "pushq %r13"
+                - code: "pushq %r14"
+                - code: "pushq %r15"
+                - code: "movq %rsp, TASK_threadsp(%rdi)"
+                  highlight: "background"
+                - code: "movq TASK_threadsp(%rsi), %rsp"
+                  highlight: "background"
+                - code: "popq %r15"
+                - code: "popq %r14"
+                - code: "popq %r12"
+                - code: "popq %r12"
+                - code: "popq %rbx"
+                - code: "popq %rbp"
+                - line: 215
+                  call: "__switch_to"
+                  code: "jmp __switch_to"
+                  highlight: true
+                  children:
+                    - line: 627
+                      call: "save_fsgs"
+                      code: "save_fsgs(prev_p)"
+                    - line: 633
+                      call: "load_TLS"
+                      code: "load_TLS(next, cpu)"
+                    - line: 664
+                      call: "x86_fsgsbase_load"
+                      code: "x86_fsgsbase_load(prev, next)"
+                    - line: 672
+                      call: "raw_cpu_write"
+                      code: "raw_cpu_write(pcpu_hot.current_task, next_p)"
+                    - call: "raw_cpu_write"
+                      code: "raw_cpu_write(pcpu_hot.top_of_stack, task_top_of_stack(next_p))"
+                    - line: 712
+                      code: "return prev_p"
+                      highlight: true
+  kernel_child_return:
+    - call: "ret_from_fork_asm"
+      children:
+        - line: 240
+          code: "movq %rax, %rdi"
+          comment: "The return value contains prev"
+        - code: "movq %rsp, %rsi"
+          comment: "The top of the stack contains user registers"
+        - code: "movq %rbx, %rdx"
+        - code: "movq %r12, %rcx"
+        - line: 244
+          call: "ret_from_fork"
+          code: "call ret_from_fork"
+          children:
+            - line: 143
+              call: "schedule_tail"
+              children:
+                - line: 5259
+                  call: "finish_task_switch"
+                  code: "finish_task_switch(prev)"
+                  highlight: true
+            - line: 156
+              call: "syscall_exit_to_user_mode"
+        - line: 257
+          call: "swapgs_restore_regs_and_return_to_usermode"
+          code: "jmp swapgs_restore_regs_and_return_to_usermode"
+          children:
+            - line: 570
+              call: "POP_REGS"
+              highlight: true
+            - line: 575
+              call: "swapgs"
+            - line: 659
+              call: "iretq"
+              highlight: true
+  user_child_return:
+    - call: "execute_disk_command"
+      children:
+        - line: 5652
+          call: "make_child"
+          children:
+            - line: 2164
+              call: "__libc_fork"
+              code: "pid = fork()"
+              highlight: true
+              children:
+                - line: 113
+                  call: "__run_postfork_handlers"
+        - line: 5749
+          call: "shell_execve"
+          children:
+            - line: 5957
+              code: "execve"
+              highlight: true
